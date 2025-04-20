@@ -14,9 +14,9 @@ import {
     Calendar,
     MapPin
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Badge } from "@/components/ui/badge.tsx";
 import {
     Table,
     TableBody,
@@ -24,18 +24,19 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+} from "@/components/ui/table.tsx";
+import { cn } from "@/lib/utils.ts";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card.tsx";
 import DocumentReviewModal from "@/components/KYC/DocumentReviewModal.tsx";
 import {IDocument} from "@/interfaces/Document.ts";
 import IDriver from "@/interfaces/Driver.ts";
+import {useParams} from "react-router-dom";
 
 function getStatusIcon(status: string) {
     switch (status) {
@@ -67,7 +68,7 @@ function getStatusBadge(status: string) {
     }
 }
 
-export default function DriverKycDetail() {
+export default function DriverDetail() {
     const [selectedDocument, setSelectedDocument] = useState<IDocument>();
     const [driver, setDriver] = useState<IDriver>(() => {
         if (typeof window != "undefined") {
@@ -79,6 +80,7 @@ export default function DriverKycDetail() {
         }
     });
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const {id} = useParams();
 
     function handleDocumentClick(doc: IDocument) {
         setSelectedDocument(doc);

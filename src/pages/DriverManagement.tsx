@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import type IDriver from "@/interfaces/Driver.ts"
+import {useNavigate} from "react-router-dom";
 
 const drivers: IDriver[] = [
     {
@@ -394,7 +395,7 @@ const getStatusBadge = (status: string) => {
     }
 }
 
-export default function DriverKycManagement() {
+export default function DriverManagement() {
     const [selectedDriver, setSelectedDriver] = useState<IDriver>({
         id: "",
         name: "",
@@ -418,10 +419,12 @@ export default function DriverKycManagement() {
     const [statusFilter, setStatusFilter] = useState("all")
     const [itemsPerPage] = useState(15)
     const [currentPage, setCurrentPage] = useState(1)
+    const navigate = useNavigate();
 
     const handleManageDriver = (driver: IDriver) => {
         setSelectedDriver(driver);
         localStorage.setItem("selectedDriver", JSON.stringify(driver));
+        navigate(`/drivers/${driver.id}`);
     }
 
     // Calculate pagination
