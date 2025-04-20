@@ -1,13 +1,20 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import AdminLoginPage from "./pages/login.tsx";
+import {Sidebar} from "@/components/Sidebar.tsx";
+import DriverKycDetail from "@/components/KYC/DriverKycDetail.tsx";
+// import Dashboard from "@/components/Dashboard.tsx";
+// import DriverKycManagement from "@/pages/driver-management.tsc.tsx";
+// import AdminLoginPage from "./pages/login.tsx";
 
 function App() {
   return (
     <>
-      <AdminLoginPage/>
+      {/*<AdminLoginPage/>*/}
+        <div className="w-full flex">
+            <Sidebar/>
+            <div className="w-[80%]">
+                <DriverKycDetail/>
+            </div>
+        </div>
     </>
   )
 }
