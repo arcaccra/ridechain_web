@@ -33,7 +33,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card.tsx";
-import DocumentReviewModal from "@/components/KYC/DocumentReviewModal.tsx";
+import DocumentReviewModal from "@/components/Document/DocumentReviewModal.tsx";
 import {IDocument} from "@/interfaces/Document.ts";
 import IDriver from "@/interfaces/Driver.ts";
 import {useParams} from "react-router-dom";

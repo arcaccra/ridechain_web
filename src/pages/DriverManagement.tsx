@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import type IDriver from "@/interfaces/Driver.ts"
 import {useNavigate} from "react-router-dom";
+import DriversTableList from "@/components/Driver/DriversTableList.tsx";
 
 const drivers: IDriver[] = [
     {
@@ -374,26 +375,6 @@ const moreDrivers = [
 // Combine the original drivers with more drivers
 const allDrivers = [...drivers, ...moreDrivers]
 
-const getStatusBadge = (status: string) => {
-    switch (status) {
-        case "Approved":
-            return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Approved</Badge>
-        case "Under Review":
-            return <Badge className="bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100">Under Review</Badge>
-        case "Rejected":
-            return <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100">Rejected</Badge>
-        case "Documents Submitted":
-            return (
-                <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">Documents Submitted</Badge>
-            )
-        case "Pending Submission":
-            return (
-                <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">Pending Submission</Badge>
-            )
-        default:
-            return <Badge variant="outline">{status}</Badge>
-    }
-}
 
 export default function DriverManagement() {
     const [selectedDriver, setSelectedDriver] = useState<IDriver>({
@@ -445,11 +426,7 @@ export default function DriverManagement() {
                                     Verify and manage driver documentation
                                 </CardDescription>
                             </div>
-                            <div className="flex gap-2">
-                                <Button variant="outline" size="sm" className="border-slate-200 text-slate-700">
-                                    <Download className="h-4 w-4 mr-1" />
-                                    Export
-                                </Button>
+                            <div>
                                 <Button size="sm" className="bg-slate-800 hover:bg-slate-700 text-white">
                                     <Plus className="h-4 w-4 mr-1" />
                                     Add Driver
@@ -496,77 +473,7 @@ export default function DriverManagement() {
                         </div>
                     </CardContent>
 
-                    <div className="px-4 sm:px-6 flex-grow flex flex-col overflow-hidden">
-                        <div className="rounded-lg border border-slate-200 flex flex-col overflow-hidden h-full">
-                            <div className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="hover:bg-slate-50 border-none">
-                                            <TableHead className="w-[250px] text-slate-700 font-medium py-2">Driver</TableHead>
-                                            <TableHead className="text-slate-700 font-medium py-2">Vehicle Info</TableHead>
-                                            <TableHead className="hidden md:table-cell text-slate-700 font-medium py-2">Status</TableHead>
-                                            <TableHead className="hidden sm:table-cell text-slate-700 font-medium py-2">
-                                                Last Updated
-                                            </TableHead>
-                                            <TableHead className="text-right text-slate-700 font-medium py-2">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                </Table>
-                            </div>
-                            <div className="overflow-y-auto flex-grow">
-                                <Table>
-                                    <TableBody>
-                                        {currentDrivers.map((driver) => (
-                                            <TableRow key={driver.id} className="hover:bg-slate-50 border-slate-200">
-                                                <TableCell className="py-2.5">
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar className="h-8 w-8 border border-slate-200">
-                                                            <AvatarImage src={driver.avatar || "/placeholder.svg"} alt={driver.name} />
-                                                            <AvatarFallback className="bg-slate-100 text-slate-700 text-xs">
-                                                                {driver.name[0]}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <p className="font-medium text-slate-800 text-sm">{driver.name}</p>
-                                                            <p className="text-xs text-slate-500">{driver.email}</p>
-                                                            <div className="md:hidden mt-1">{getStatusBadge(driver.kycStatus)}</div>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="py-2.5">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="bg-slate-100 p-1.5 rounded-full">
-                                                            <Car className="h-3.5 w-3.5 text-slate-600" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-slate-800">{driver.vehicle}</p>
-                                                            <p className="text-xs text-slate-500">{driver.licensePlate}</p>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell py-2.5">
-                                                    {getStatusBadge(driver.kycStatus)}
-                                                </TableCell>
-                                                <TableCell className="hidden sm:table-cell py-2.5 text-slate-600 text-sm">
-                                                    {driver.lastUpdated}
-                                                </TableCell>
-                                                <TableCell className="text-right py-2.5">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="h-7 text-xs border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
-                                                        onClick={() => handleManageDriver(driver)}
-                                                    >
-                                                        Manage
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    </div>
+                    <DriversTableList drivers={allDrivers} onManageClick={handleManageDriver} />
 
                     <CardFooter className="flex flex-col sm:flex-row justify-between items-center border-t border-slate-200 px-6 py-3 gap-3 flex-shrink-0">
                         <div className="text-sm text-slate-500 order-2 sm:order-1">
