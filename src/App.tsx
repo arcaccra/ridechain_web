@@ -1,22 +1,34 @@
 import './App.css'
-import {Sidebar} from "@/components/Sidebar.tsx";
-import DriverKycDetail from "@/components/KYC/DriverKycDetail.tsx";
-// import Dashboard from "@/components/Dashboard.tsx";
-// import DriverKycManagement from "@/pages/driver-management.tsc.tsx";
-// import AdminLoginPage from "./pages/login.tsx";
+import DriverDetail from "@/pages/DriverDetail.tsx";
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import Dashboard from "@/components/Dashboard.tsx";
+import DriverManagement from "@/pages/DriverManagement.tsx";
+import {MainLayout} from "@/pages/MainLayout.tsx";
+
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <MainLayout />,
+        children: [
+            {
+                index: true,
+                element: <Dashboard/>,
+            },
+            {
+                path: "/drivers",
+                element: <DriverManagement/>,
+            },
+            {
+                path: "/drivers/:id",
+                element: <DriverDetail/>,
+            }
+        ]
+    }
+]);
 
 function App() {
-  return (
-    <>
-      {/*<AdminLoginPage/>*/}
-        <div className="w-full flex">
-            <Sidebar/>
-            <div className="w-[80%]">
-                <DriverKycDetail/>
-            </div>
-        </div>
-    </>
-  )
+    return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;
