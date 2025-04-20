@@ -1,13 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Car, Filter, Search, ChevronLeft, ChevronRight, Download, Plus } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Filter, Search, ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import type IDriver from "@/interfaces/Driver.ts"
 import {useNavigate} from "react-router-dom";
