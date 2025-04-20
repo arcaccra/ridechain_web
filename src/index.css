@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+    --background: 255 255 255;
+    --foreground: 17 24 39;
+    --border: 229 231 235;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+}
+
+@layer utilities {
+    .bg-background { background-color: rgb(var(--background)) }
+    .ring-border { --tw-ring-color: rgb(var(--border)) }
+
+    .bg-destructive { background-color: hsl(var(--destructive)) }
+    .text-destructive-foreground { color: hsl(var(--destructive-foreground)) }
+}
