@@ -4,6 +4,8 @@ import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import Dashboard from "@/components/Dashboard.tsx";
 import DriverManagement from "@/pages/DriverManagement.tsx";
 import {MainLayout} from "@/pages/MainLayout.tsx";
+import RidesManagement from "@/pages/RidesManagement.tsx";
+import PaymentsManagement from "@/pages/PaymentsManagement.tsx";
 
 
 const router = createBrowserRouter([
@@ -18,6 +20,14 @@ const router = createBrowserRouter([
             {
                 path: "/drivers",
                 element: <DriverManagement/>,
+            },
+            {
+                path: "/rides",
+                element: <RidesManagement/>,
+            },
+            {
+                path: "/payments",
+                element: <PaymentsManagement/>,
             },
             {
                 path: "/drivers/:id",
