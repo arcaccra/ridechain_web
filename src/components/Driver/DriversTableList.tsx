@@ -1,6 +1,5 @@
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";
-import {Car} from "lucide-react";
+import {ChevronLeft, ChevronRight} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import IDriver from "@/interfaces/Driver.ts";
 import {Badge} from "@/components/ui/badge.tsx";
@@ -8,93 +7,133 @@ import {Badge} from "@/components/ui/badge.tsx";
 interface IProps {
     drivers: IDriver[]
     onManageClick: (driver: IDriver) => void;
+    currentPage?: number;
+    totalPages?: number;
+    onPageChange?: (page: number) => void;
 }
 
-const getStatusBadge = (status: string) => {
-    switch (status) {
-        case "Approved":
-            return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Approved</Badge>
-        case "Under Review":
-            return <Badge className="bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100">Under Review</Badge>
-        case "Rejected":
-            return <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100">Rejected</Badge>
-        case "Documents Submitted":
-            return (
-                <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">Documents Submitted</Badge>
-            )
-        case "Pending Submission":
-            return (
-                <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">Pending Submission</Badge>
-            )
-        default:
-            return <Badge variant="outline">{status}</Badge>
-    }
-}
 
-export default function DriversTableList({drivers, onManageClick}: IProps) {
+export default function DriversTableList({drivers, onManageClick, currentPage, totalPages, onPageChange}: IProps) {
     return (
-        <div className="px-4 sm:px-6 flex-grow flex flex-col overflow-hidden">
-            <div className="rounded-lg border border-slate-200 flex flex-col overflow-hidden h-full">
-                <Table>
-                    <TableHeader className="bg-slate-50">
-                        <TableRow className="hover:bg-slate-50 border-none">
-                            <TableHead className="w-[30%] text-slate-700 font-medium py-2">Driver</TableHead>
-                            <TableHead className="w-[25%] text-slate-700 font-medium py-2">Vehicle Info</TableHead>
-                            <TableHead className="w-[15%] text-slate-700 font-medium py-2">Status</TableHead>
-                            <TableHead className="w-[15%] text-slate-700 font-medium py-2">Last Updated</TableHead>
-                            <TableHead className="w-[15%] text-right text-slate-700 font-medium py-2">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
+        <div className="w-full bg-white">
+            <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">Drivers Table</h2>
 
-                    <TableBody className="overflow-y-auto flex-grow">
-                        {drivers.map((driver) => (
-                            <TableRow key={driver.id} className="hover:bg-slate-50 border-slate-200">
-                                <TableCell className="w-[30%] py-2.5">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="h-8 w-8 border border-slate-200">
-                                            <AvatarImage src={driver.avatar || "/placeholder.svg"} alt={driver.name} />
-                                            <AvatarFallback className="bg-slate-100 text-slate-700 text-xs">
-                                                {driver.name[0]}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="font-medium text-slate-800 text-sm">{driver.name}</p>
-                                            <p className="text-xs text-slate-500">{driver.email}</p>
-                                            <div className="md:hidden mt-1">{getStatusBadge(driver.kycStatus)}</div>
-                                        </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell className="w-[25%] py-2.5">
-                                    <div className="flex items-center gap-2">
-                                        <div className="bg-slate-100 p-1.5 rounded-full">
-                                            <Car className="h-3.5 w-3.5 text-slate-600" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-slate-800">{driver.vehicle}</p>
-                                            <p className="text-xs text-slate-500">{driver.licensePlate}</p>
-                                        </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell className="w-[15%] hidden md:table-cell py-2.5">
-                                    {getStatusBadge(driver.kycStatus)}
-                                </TableCell>
-                                <TableCell className="w-[15%] hidden sm:table-cell py-2.5 text-slate-600 text-sm">
-                                    {driver.lastUpdated}
-                                </TableCell>
-                                <TableCell className="w-[15%] text-right py-2.5">
+                {/* Table Header */}
+                <div className="grid grid-cols-12 gap-4 pb-3 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="col-span-5">DRIVER</div>
+                    <div className="col-span-3">VEHICLE INFO</div>
+                    <div className="col-span-2">STATUS</div>
+                    <div className="col-span-1">LAST UPDATED</div>
+                </div>
+
+                {/* Table Body */}
+                <div className="divide-y divide-gray-100">
+                    {drivers.map((driver) => (
+                        <div key={driver.id} className="grid grid-cols-12 gap-4 py-4 items-center hover:bg-gray-50">
+                            {/* Driver */}
+                            <div className="col-span-5 flex items-center space-x-3">
+                                <Avatar className="h-10 w-10">
+                                    <AvatarImage src={`/placeholder.svg?height=40&width=40`} />
+                                    <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
+                                        {driver.avatar}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">{driver.name}</p>
+                                    <p className="text-xs text-gray-500">{driver.email}</p>
+                                </div>
+                            </div>
+
+                            {/* Vehicle Info */}
+                            <div className="col-span-3">
+                                <p className="text-sm font-medium text-gray-900">{driver.vehicle}</p>
+                                <p className="text-xs text-gray-500">{driver.licensePlate}</p>
+                            </div>
+
+                            {/* Status */}
+                            <div className="col-span-2">
+                                <Badge
+                                    className={`text-xs font-medium px-2.5 py-1 rounded-full border-0 ${
+                                        driver.kycStatus === "Approved" 
+                                            ? "bg-green-100 text-green-700" 
+                                            : driver.kycStatus === "Under Review"
+                                                ? "bg-blue-100 text-blue-700"
+                                                : driver.kycStatus === "Rejected"
+                                                    ? "bg-red-100 text-red-700"
+                                                    : driver.kycStatus === "Documents Submitted"
+                                                        ? "bg-amber-100 text-amber-700"
+                                                        : "bg-gray-100 text-gray-700"
+                                    }`}
+                                >
+                                    {driver.kycStatus}
+                                </Badge>
+                            </div>
+
+                            {/* Last Updated */}
+                            <div className="col-span-1">
+                                <p className="text-sm text-gray-900">{driver.lastUpdated}</p>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="col-span-1">
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="text-gray-500 hover:text-gray-700 text-xs"
+                                    onClick={() => onManageClick(driver)}
+                                >
+                                    Edit
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages && (
+                    <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+                        <div className="flex items-center space-x-4">
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-gray-500 hover:text-gray-700 px-2"
+                                disabled={currentPage === 1}
+                                onClick={() => onPageChange && onPageChange((currentPage || 1) - 1)}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                <span className="text-sm">Back</span>
+                            </Button>
+                            <div className="flex items-center space-x-1">
+                                {[1, 2, 3, 4, 5].map((page) => (
                                     <Button
-                                        variant="outline"
+                                        key={page}
+                                        variant={page === currentPage ? "default" : "outline"}
                                         size="sm"
-                                        className="h-7 text-xs border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
-                                        onClick={() => onManageClick(driver)}
+                                        className={`h-8 w-8 p-0 text-sm ${
+                                            page === currentPage
+                                                ? "bg-black text-white hover:bg-black/90"
+                                                : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                                        }`}
+                                        onClick={() => onPageChange && onPageChange(page)}
                                     >
-                                        Manage
+                                        {page}
                                     </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                                ))}
+                            </div>
+                        </div>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-gray-500 hover:text-gray-700 px-2"
+                            disabled={currentPage === totalPages}
+                            onClick={() => onPageChange && onPageChange((currentPage || 1) + 1)}
+                        >
+                            <span className="text-sm">Next</span>
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     )
