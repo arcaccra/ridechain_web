@@ -323,8 +323,7 @@ export default function DriverManagement() {
 
                 {/* Drivers Table Section */}
                 <div className="flex-1">
-                    <div className="bg-gray-50 p-6 rounded-3xl">
-                        <h2 className="text-lg font-semibold text-gray-900">Drivers Table</h2>
+                    <div className="bg-gray-50 px-6 py-3 rounded-3xl">
 
                         <DriversTableList 
                             drivers={currentDrivers} 
