@@ -5,6 +5,8 @@ import type IDriver from "@/interfaces/Driver.ts"
 import {useNavigate} from "react-router-dom";
 import DriversTableList from "@/components/Driver/DriversTableList.tsx";
 import StatisticsCard from "@/components/StatisticsCard.tsx";
+import useFetchData from "@/hooks/useFetchData.tsx";
+
 
 const allDrivers: IDriver[] = [
     {
@@ -259,6 +261,9 @@ export default function DriverManagement() {
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
     const currentDrivers = allDrivers.slice(startIndex, endIndex)
+
+    const {data, isLoading, isError} = useFetchData(`/apis/accounts/drivers`, ["drivers"])
+    console.log(data, "DATAAA");
 
     return (
         <div className="flex-1 p-8">
