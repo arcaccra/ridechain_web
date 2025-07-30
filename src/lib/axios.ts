@@ -1,4 +1,3 @@
-
 import axios from "axios";
 
 // Create an instance of Axios
@@ -6,6 +5,7 @@ const httpFetch = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
     headers: {
         Accept: "application/json",
+        "Content-Type": "application/json",
     },
 });
 
@@ -14,16 +14,12 @@ httpFetch.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = `Token ${token}`;
         }
 
         // Handle custom content types dynamically
-        if (!config.headers["Content-Type"]) {
-            if (config.data instanceof FormData) {
-                config.headers["Content-Type"] = "multipart/form-data";
-            } else {
-                config.headers["Content-Type"] = "application/json";
-            }
+        if (config.data instanceof FormData) {
+            config.headers["Content-Type"] = "multipart/form-data";
         }
 
         return config;
