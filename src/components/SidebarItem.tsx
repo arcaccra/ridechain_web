@@ -11,7 +11,7 @@ export default function SidebarItem({ icon, label, path, isActive = false }: Sid
         <a
           href={path}
           className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm ${
-            isActive ? "bg-white/10 text-white" : "text-gray-300 hover:bg-white/5 hover:text-white"
+            isActive ? "bg-black text-white" : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
           }`}
         >
           {icon}

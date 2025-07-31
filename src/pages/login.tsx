@@ -1,88 +1,94 @@
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
-export default function AdminLoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
 
-    return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
-            <div className="w-full max-w-md">
-                <div className="bg-white shadow-2xl rounded-xl border border-slate-200 overflow-hidden">
-                    <div className="bg-slate-800 text-white p-6 text-center">
-                        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                        <p className="text-slate-300 mt-2">Secure Administrator Login</p>
-                    </div>
+    try {
+      const response = await fetch('https://app.arcaccra.com/apis/accounts/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-                    <form onSubmit={handleLogin} className="p-8 space-y-6">
-                        <div>
-                            <label htmlFor="email" className="block text-slate-700 font-medium mb-2">
-                                Email Address
-                            </label>
-                            <div className="relative">
-                                <input
-                                    id="email"
-                                    type="email"
-                                    placeholder="Enter your admin email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 transition duration-300"
-                                    required
-                                />
-                            </div>
-                        </div>
+      if (response.ok) {
+        const data = await response.json();
+        // Assuming the user object is in the response data
+        login(data.token, { full_name: data.user.full_name, email: data.user.email, avatar: data.user.avatar });
+        navigate('/');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || 'Login failed');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+    }
+  };
 
-                        <div>
-                            <label htmlFor="password" className="block text-slate-700 font-medium mb-2">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 transition duration-300"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-700"
-                                >
-                                    {showPassword ? "Hide" : "Show"}
-                                </button>
-                            </div>
-                            <a
-                                href="/admin/forgot-password"
-                                className="text-sm text-slate-500 hover:text-slate-700 mt-2 inline-block"
-                            >
-                                Forgot Password?
-                            </a>
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="w-full bg-slate-800 text-white py-3 rounded-lg hover:bg-slate-700 transition duration-300 ease-in-out"
-                        >
-                            Log In
-                        </button>
-                    </form>
-
-                    <div className="bg-slate-100 p-4 text-center text-sm text-slate-600 border-t">
-                        Authorized Personnel Only
-                    </div>
-                </div>
-
-                <div className="text-center mt-4 text-slate-500 text-xs">
-                    © 2024 Ride Management System | Confidential Access
-                </div>
-            </div>
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900">Sign in to your account</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Or <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">create a new account</Link>
+          </p>
         </div>
-    );
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="email" className="text-sm font-medium text-gray-700">
+              Email address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <div>
+            <button
+              type="submit"
+              className="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Sign in
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
+
+export default Login;

@@ -1,126 +1,172 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Ride } from "@/interfaces/Ride";
 import { Button } from "@/components/ui/button";
-
-const rides: Ride[] = [
-    {
-        id: "RIDE001",
-        driverName: "Kwame Appiah",
-        passengerName: "Ama Serwaa",
-        startLocation: "Accra Mall",
-        endLocation: "East Legon",
-        startTime: "2024-07-26 10:00",
-        endTime: "2024-07-26 10:30",
-        status: "completed",
-        fare: 25.00,
-    },
-    {
-        id: "RIDE002",
-        driverName: "Kofi Mensah",
-        passengerName: "Yaw Donkor",
-        startLocation: "Circle",
-        endLocation: "Osu",
-        startTime: "2024-07-26 11:00",
-        endTime: "2024-07-26 11:45",
-        status: "in-progress",
-        fare: 30.00,
-    },
-    {
-        id: "RIDE003",
-        driverName: "Adwoa Boateng",
-        passengerName: "Esi Parker",
-        startLocation: "Labadi",
-        endLocation: "Airport",
-        startTime: "2024-07-27 09:00",
-        endTime: "",
-        status: "scheduled",
-        fare: 40.00,
-    },
-    {
-        id: "RIDE004",
-        driverName: "Yaw Asante",
-        passengerName: "Kojo Williams",
-        startLocation: "Spintex",
-        endLocation: "Tema",
-        startTime: "2024-07-25 14:00",
-        endTime: "2024-07-25 14:15",
-        status: "cancelled",
-        fare: 35.00,
-    },
-];
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Ride } from "@/interfaces/Ride";
+import { format } from "date-fns";
 
 const getStatusBadge = (status: string) => {
     switch (status) {
         case "completed":
-            return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Completed</Badge>
+            return <Badge className="bg-green-100 text-green-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Completed</Badge>
         case "in-progress":
-            return <Badge className="bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100">In Progress</Badge>
+            return <Badge className="bg-blue-100 text-blue-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">In Progress</Badge>
         case "cancelled":
-            return <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100">Cancelled</Badge>
+            return <Badge className="bg-red-100 text-red-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Cancelled</Badge>
         case "scheduled":
-            return (
-                <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">Scheduled</Badge>
-            )
+            return <Badge className="bg-amber-100 text-amber-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Scheduled</Badge>
         default:
-            return <Badge variant="outline">{status}</Badge>
+            return <Badge className="bg-gray-100 text-gray-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">{status}</Badge>
     }
 }
 
-export function RidesTableList() {
-  return (
-    <div className="px-4 sm:px-6 flex-grow flex flex-col overflow-hidden">
-        <div className="rounded-lg border border-slate-200 flex flex-col overflow-hidden h-full">
-            <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow className="hover:bg-slate-50 border-none">
-                  <TableHead className="w-[20%] text-slate-700 font-medium py-2">Ride ID</TableHead>
-                  <TableHead className="w-[25%] text-slate-700 font-medium py-2">Participants</TableHead>
-                  <TableHead className="w-[25%] text-slate-700 font-medium py-2">Route</TableHead>
-                  <TableHead className="w-[15%] text-slate-700 font-medium py-2">Status</TableHead>
-                  <TableHead className="w-[15%] text-right text-slate-700 font-medium py-2">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="overflow-y-auto flex-grow">
-                {rides.map((ride) => (
-                  <TableRow key={ride.id} className="hover:bg-slate-50 border-slate-200">
-                    <TableCell className="w-[20%] py-2.5 font-medium text-slate-800 text-sm">{ride.id}</TableCell>
-                    <TableCell className="w-[25%] py-2.5">
-                        <div>
-                            <p className="text-sm text-slate-800">{`Driver: ${ride.driverName}`}</p>
-                            <p className="text-xs text-slate-500">{`Passenger: ${ride.passengerName}`}</p>
+const getInitials = (name: string) => {
+    return name
+        .split(' ')
+        .map(part => part[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+};
+
+const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return format(new Date(dateString), 'MMM d, yyyy h:mm a');
+};
+
+const calculateDuration = (start: string, end: string) => {
+    if (!start) return 'N/A';
+    const startDate = new Date(start);
+    const endDate = end ? new Date(end) : new Date();
+    
+    const diffMs = endDate.getTime() - startDate.getTime();
+    const diffMins = Math.round(diffMs / 60000);
+    
+    if (diffMins < 60) return `${diffMins} min`;
+    const hours = Math.floor(diffMins / 60);
+    const mins = diffMins % 60;
+    return `${hours}h ${mins}m`;
+};
+
+interface RidesTableListProps {
+    rides: Ride[];
+    onManageClick?: (rideId: string) => void;
+    currentPage?: number;
+    totalPages?: number;
+    onPageChange?: (page: number) => void;
+}
+
+export function RidesTableList({ rides, onManageClick, currentPage = 1, totalPages = 1, onPageChange }: RidesTableListProps) {
+    return (
+        <div className="w-full bg-[#FAFAFA] flex flex-col">
+            <div className="px-6 py-3">
+                {/* Table Header */}
+                <div className="grid grid-cols-12 gap-4 pb-3  border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="col-span-4">DRIVER</div>
+                    <div className="col-span-3">RIDER</div>
+                    <div className="col-span-2">DURATION</div>
+                    <div className="col-span-2">STATUS</div>
+                    <div className="col-span-1"></div>
+                </div>
+
+                {/* Table Body */}
+                <div className="divide-y divide-gray-100">
+                    {rides.map((ride) => (
+                        <div key={ride.id} className="grid grid-cols-12 gap-4 py-4 items-center hover:bg-gray-50">
+                            {/* Driver */}
+                            <div className="col-span-4 flex items-center space-x-3">
+                                <Avatar className="h-10 w-10">
+                                    <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={ride.driverName} />
+                                    <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
+                                        {getInitials(ride.driverName)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">{ride.driverName}</p>
+                                    <p className="text-xs text-gray-500">{formatDate(ride.startTime)}</p>
+                                </div>
+                            </div>
+
+                            {/* Rider */}
+                            <div className="col-span-3">
+                                <p className="text-sm font-medium text-gray-900">{ride.passengerName}</p>
+                                <p className="text-xs text-gray-500">{ride.startLocation}</p>
+                            </div>
+
+                            {/* Duration */}
+                            <div className="col-span-2">
+                                <p className="text-sm font-medium text-gray-900">{calculateDuration(ride.startTime, ride.endTime)}</p>
+                                <p className="text-xs text-gray-500">{ride.endTime ? 'Completed' : 'In progress'}</p>
+                            </div>
+
+                            {/* Status */}
+                            <div className="col-span-2">
+                                {getStatusBadge(ride.status)}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="col-span-1">
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="text-gray-500 hover:text-gray-700 text-xs"
+                                    onClick={() => onManageClick?.(ride.id)}
+                                >
+                                    Edit
+                                </Button>
+                            </div>
                         </div>
-                    </TableCell>
-                    <TableCell className="w-[25%] py-2.5">
-                        <div>
-                            <p className="text-sm text-slate-800">{`${ride.startLocation} to ${ride.endLocation}`}</p>
-                            <p className="text-xs text-slate-500">{ride.startTime}</p>
+                    ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+                        <div className="flex items-center space-x-4">
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-gray-500 hover:text-gray-700 px-2"
+                                disabled={currentPage === 1}
+                                onClick={() => onPageChange && onPageChange(currentPage - 1)}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                <span className="text-sm">Back</span>
+                            </Button>
+                            <div className="flex items-center space-x-1">
+                                {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
+                                    const page = index + 1;
+                                    return (
+                                        <Button
+                                            key={page}
+                                            variant={page === currentPage ? "default" : "outline"}
+                                            size="sm"
+                                            className={`h-8 w-8 p-0 text-sm ${
+                                                page === currentPage
+                                                    ? "bg-black text-white hover:bg-black/90"
+                                                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                                            }`}
+                                            onClick={() => onPageChange && onPageChange(page)}
+                                        >
+                                            {page}
+                                        </Button>
+                                    );
+                                })}
+                            </div>
                         </div>
-                    </TableCell>
-                    <TableCell className="w-[15%] hidden md:table-cell py-2.5">
-                        {getStatusBadge(ride.status)}
-                    </TableCell>
-                    <TableCell className="w-[15%] text-right py-2.5">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-xs border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-gray-500 hover:text-gray-700 px-2"
+                            disabled={currentPage === totalPages}
+                            onClick={() => onPageChange && onPageChange(currentPage + 1)}
                         >
-                            Manage
+                            <span className="text-sm">Next</span>
+                            <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                )}
+            </div>
         </div>
-    </div>
-  );
+    );
 }
