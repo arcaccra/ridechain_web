@@ -32,13 +32,13 @@ export default function DriversTableList({drivers, onManageClick, currentPage, t
                             placeholder="Search drivers..."
                             value={searchQuery}
                             onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-                            className="w-64"
+                            className="w-64 border-0 bg-slate-100 focus:ring-0 focus:border-0 focus:ring-offset-0 text-sm"
                         />
                         <Select value={statusFilter} onValueChange={(value) => onStatusFilterChange && onStatusFilterChange(value)}>
-                            <SelectTrigger className="w-48">
+                            <SelectTrigger className="w-48 border-0 bg-slate-100 focus:ring-0 focus:border-0 focus:ring-offset-0 text-sm">
                                 <SelectValue placeholder="Filter by status" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-slate-950 text-sm text-white shadow-lg rounded-lg">
                                 <SelectItem value="all">All Statuses</SelectItem>
                                 <SelectItem value="Approved">Approved</SelectItem>
                                 <SelectItem value="Under Review">Under Review</SelectItem>
