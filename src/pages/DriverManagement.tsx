@@ -47,7 +47,7 @@ export default function DriverManagement() {
             headers: {
                 'Content-Type': 'application/json',
             }
-        }, true
+        }, true, 1000 * 60 * 60 * 3
     )
 
     if (isLoading) return <div>Loading...</div>

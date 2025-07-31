@@ -5,7 +5,8 @@ export default function useFetchData(
     url: string,
     queryKey: any[],
     headers = {},
-    isEnabled = true
+    isEnabled = true,
+    staleTime?: number
 ) {
     const { data, isLoading, isError, error} = useQuery({
         enabled: isEnabled,
@@ -19,6 +20,7 @@ export default function useFetchData(
             }
         },
         queryKey: queryKey,
+        staleTime: staleTime
     });
 
     return { data, isLoading, isError, error};

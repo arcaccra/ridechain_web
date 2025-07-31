@@ -29,6 +29,7 @@ export default function DriversTableList({drivers, onManageClick, currentPage, t
                             <th className="text-left">Last Updated</th>
                             <th className="text-left">Action</th>
                         </tr>
+                        <tr className="h-8"></tr>
                     </thead>
                     <tbody>
                         {drivers.map((driver) => (
