@@ -1,11 +1,11 @@
 export interface Ride {
-  id: string;
-  driverName: string;
-  passengerName: string;
-  startLocation: string;
-  endLocation: string;
-  startTime: string;
-  endTime: string;
-  status: 'completed' | 'in-progress' | 'cancelled' | 'scheduled';
-  fare: number;
+  created_at: string;
+  driver: Driver;
+  drop_off: number;
+  pick_up: number;
+  price_per_seat: string;
+  seats_available: number;
+  updated_at: string;
+  uuid: string;
+  status?: 'completed' | 'in-progress' | 'cancelled' | 'scheduled' | string;
 }

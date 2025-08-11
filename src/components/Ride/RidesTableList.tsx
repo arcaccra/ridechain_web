@@ -6,7 +6,7 @@ import { Ride } from "@/interfaces/Ride";
 import { format } from "date-fns";
 
 const getStatusBadge = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
         case "completed":
             return <Badge className="bg-green-100 text-green-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Completed</Badge>
         case "in-progress":
@@ -16,11 +16,12 @@ const getStatusBadge = (status: string) => {
         case "scheduled":
             return <Badge className="bg-amber-100 text-amber-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Scheduled</Badge>
         default:
-            return <Badge className="bg-gray-100 text-gray-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">{status}</Badge>
+            return <Badge className="bg-gray-100 text-gray-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">{status || 'N/A'}</Badge>
     }
 }
 
-const getInitials = (name: string) => {
+const getInitials = (name?: string) => {
+    if (!name) return '--';
     return name
         .split(' ')
         .map(part => part[0])
@@ -31,21 +32,20 @@ const getInitials = (name: string) => {
 
 const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
-    return format(new Date(dateString), 'MMM d, yyyy h:mm a');
+    try {
+        return format(new Date(dateString), 'MMM d, yyyy h:mm a');
+    } catch (e) {
+        return 'Invalid date';
+    }
 };
 
-const calculateDuration = (start: string, end: string) => {
-    if (!start) return 'N/A';
-    const startDate = new Date(start);
-    const endDate = end ? new Date(end) : new Date();
-    
-    const diffMs = endDate.getTime() - startDate.getTime();
-    const diffMins = Math.round(diffMs / 60000);
-    
-    if (diffMins < 60) return `${diffMins} min`;
-    const hours = Math.floor(diffMins / 60);
-    const mins = diffMins % 60;
-    return `${hours}h ${mins}m`;
+const formatPrice = (price: string) => {
+    const amount = parseFloat(price);
+    if (isNaN(amount)) return 'N/A';
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'GHS'
+    }).format(amount);
 };
 
 interface RidesTableListProps {
@@ -61,59 +61,66 @@ export function RidesTableList({ rides, onManageClick, currentPage = 1, totalPag
         <div className="w-full bg-[#FAFAFA] flex flex-col">
             <div className="px-6 py-3">
                 {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 pb-3  border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <div className="col-span-4">DRIVER</div>
-                    <div className="col-span-3">RIDER</div>
-                    <div className="col-span-2">DURATION</div>
+                <div className="grid grid-cols-12 gap-4 pb-3 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="col-span-3">DRIVER</div>
+                    <div className="col-span-2">VEHICLE</div>
+                    <div className="col-span-2">SEATS</div>
+                    <div className="col-span-2">PRICE/SEAT</div>
                     <div className="col-span-2">STATUS</div>
-                    <div className="col-span-1"></div>
                 </div>
 
                 {/* Table Body */}
                 <div className="divide-y divide-gray-100">
                     {rides.map((ride) => (
-                        <div key={ride.id} className="grid grid-cols-12 gap-4 py-4 items-center hover:bg-gray-50">
+                        <div key={ride.uuid} className="grid grid-cols-12 gap-4 py-4 items-center hover:bg-gray-50">
                             {/* Driver */}
-                            <div className="col-span-4 flex items-center space-x-3">
+                            <div className="col-span-3 flex items-center space-x-3">
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={ride.driverName} />
+                                    <AvatarImage src={ride.driver?.user?.avatar} alt={ride.driver?.user?.full_name} />
                                     <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
-                                        {getInitials(ride.driverName)}
+                                        {getInitials(ride.driver?.user?.full_name)}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-900">{ride.driverName}</p>
-                                    <p className="text-xs text-gray-500">{formatDate(ride.startTime)}</p>
+                                    <p className="text-sm font-medium text-gray-900">
+                                        {ride.driver?.user?.full_name || 'N/A'}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {ride.driver?.online ? '🟢 Online' : '⚪ Offline'}
+                                    </p>
                                 </div>
                             </div>
 
-                            {/* Rider */}
-                            <div className="col-span-3">
-                                <p className="text-sm font-medium text-gray-900">{ride.passengerName}</p>
-                                <p className="text-xs text-gray-500">{ride.startLocation}</p>
+                            {/* Vehicle */}
+                            <div className="col-span-2">
+                                <p className="text-sm font-medium text-gray-900">{ride.driver?.vehicle_type || 'N/A'}</p>
+                                <p className="text-xs text-gray-500">{ride.driver?.vehicle_plate_number || 'N/A'}</p>
                             </div>
 
-                            {/* Duration */}
+                            {/* Seats */}
                             <div className="col-span-2">
-                                <p className="text-sm font-medium text-gray-900">{calculateDuration(ride.startTime, ride.endTime)}</p>
-                                <p className="text-xs text-gray-500">{ride.endTime ? 'Completed' : 'In progress'}</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                    {ride.seats_available} / {ride.pick_up + ride.drop_off} seats
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {ride.pick_up} pickup • {ride.drop_off} dropoff
+                                </p>
+                            </div>
+
+                            {/* Price */}
+                            <div className="col-span-2">
+                                <p className="text-sm font-medium text-gray-900">
+                                    {formatPrice(ride.price_per_seat)}
+                                </p>
+                                <p className="text-xs text-gray-500">per seat</p>
                             </div>
 
                             {/* Status */}
                             <div className="col-span-2">
-                                {getStatusBadge(ride.status)}
-                            </div>
-
-                            {/* Actions */}
-                            <div className="col-span-1">
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-gray-500 hover:text-gray-700 text-xs"
-                                    onClick={() => onManageClick?.(ride.id)}
-                                >
-                                    Edit
-                                </Button>
+                                {getStatusBadge(ride.status || '')}
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {formatDate(ride.created_at)}
+                                </p>
                             </div>
                         </div>
                     ))}
@@ -121,48 +128,25 @@ export function RidesTableList({ rides, onManageClick, currentPage = 1, totalPag
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-                        <div className="flex items-center space-x-4">
-                            <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-gray-500 hover:text-gray-700 px-2"
-                                disabled={currentPage === 1}
-                                onClick={() => onPageChange && onPageChange(currentPage - 1)}
-                            >
-                                <ChevronLeft className="h-4 w-4 mr-1" />
-                                <span className="text-sm">Back</span>
-                            </Button>
-                            <div className="flex items-center space-x-1">
-                                {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-                                    const page = index + 1;
-                                    return (
-                                        <Button
-                                            key={page}
-                                            variant={page === currentPage ? "default" : "outline"}
-                                            size="sm"
-                                            className={`h-8 w-8 p-0 text-sm ${
-                                                page === currentPage
-                                                    ? "bg-black text-white hover:bg-black/90"
-                                                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                            }`}
-                                            onClick={() => onPageChange && onPageChange(page)}
-                                        >
-                                            {page}
-                                        </Button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-gray-500 hover:text-gray-700 px-2"
-                            disabled={currentPage === totalPages}
-                            onClick={() => onPageChange && onPageChange(currentPage + 1)}
+                    <div className="flex items-center justify-between mt-4">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
+                            disabled={currentPage <= 1}
                         >
-                            <span className="text-sm">Next</span>
-                            <ChevronRight className="h-4 w-4 ml-1" />
+                            <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+                        </Button>
+                        <span className="text-sm text-gray-700">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage >= totalPages}
+                        >
+                            Next <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                     </div>
                 )}
