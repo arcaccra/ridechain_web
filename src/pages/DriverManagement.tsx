@@ -43,11 +43,7 @@ export default function DriverManagement() {
     }
 
     const {data, isLoading, isError} = useFetchData(`/apis/accounts/drivers/`, ["drivers"],
-        {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }, true, 1000 * 60 * 60 * 3
+        {}, true, 1000 * 60 * 60 * 3
     )
 
     if (isLoading) return <div>Loading...</div>
