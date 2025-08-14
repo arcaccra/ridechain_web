@@ -47,8 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await fetch('https://app.arcaccra.com/accounts/logout/', {
-        method: 'POST',
+      await fetch('https://app.arcaccra.com/apis/accounts/logout/', {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Token ${token}`

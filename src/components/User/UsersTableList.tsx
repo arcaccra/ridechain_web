@@ -2,19 +2,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Ride } from "@/interfaces/Ride";
 import { format } from "date-fns";
+import { IUser } from "@/interfaces/Driver";
 
 const getStatusBadge = (status: string) => {
     switch (status?.toLowerCase()) {
-        case "completed":
-            return <Badge className="bg-green-100 text-green-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Completed</Badge>
-        case "in-progress":
-            return <Badge className="bg-blue-100 text-blue-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">In Progress</Badge>
-        case "cancelled":
-            return <Badge className="bg-red-100 text-red-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Cancelled</Badge>
-        case "scheduled":
-            return <Badge className="bg-amber-100 text-amber-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Scheduled</Badge>
+        case "active":
+            return <Badge className="bg-green-100 text-green-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Active</Badge>
+        case "inactive":
+            return <Badge className="bg-red-100 text-red-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Inactive</Badge>
+        case "pending":
+            return <Badge className="bg-amber-100 text-amber-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Pending</Badge>
         default:
             return <Badge className="bg-gray-100 text-gray-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">{status || 'N/A'}</Badge>
     }
@@ -39,87 +37,80 @@ const formatDate = (dateString: string) => {
     }
 };
 
-const formatPrice = (price: string) => {
-    const amount = parseFloat(price);
-    if (isNaN(amount)) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'GHS'
-    }).format(amount);
-};
+// Extended user interface with additional properties for the table
+export interface User extends IUser {
+    created_at?: string;
+    status?: 'active' | 'inactive' | 'pending' | string;
+    role?: string;
+}
 
-interface RidesTableListProps {
-    rides: Ride[];
-    onManageClick?: (rideId: string) => void;
+interface UsersTableListProps {
+    users: User[];
+    onManageClick?: (userId: number) => void;
     currentPage?: number;
     totalPages?: number;
     onPageChange?: (page: number) => void;
 }
 
-export function RidesTableList({ rides, onManageClick, currentPage = 1, totalPages = 1, onPageChange }: RidesTableListProps) {
+export function UsersTableList({ users, onManageClick, currentPage = 1, totalPages = 1, onPageChange }: UsersTableListProps) {
     return (
         <div className="w-full bg-[#FAFAFA] flex flex-col">
             <div className="px-6 py-3">
                 {/* Table Header */}
                 <div className="grid grid-cols-12 gap-4 pb-3 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <div className="col-span-3">DRIVER</div>
-                    <div className="col-span-2">VEHICLE</div>
-                    <div className="col-span-2">SEATS</div>
-                    <div className="col-span-2">PRICE/SEAT</div>
+                    <div className="col-span-3">USER</div>
+                    <div className="col-span-3">EMAIL</div>
+                    <div className="col-span-2">PHONE</div>
+                    <div className="col-span-2">ROLE</div>
                     <div className="col-span-2">STATUS</div>
                 </div>
 
                 {/* Table Body */}
                 <div className="divide-y divide-gray-100">
-                    {rides.map((ride) => (
-                        <div key={ride.uuid} className="grid grid-cols-12 gap-4 py-4 items-center hover:bg-gray-50">
-                            {/* Driver */}
+                    {users.map((user) => (
+                        <div key={user.id} className="grid grid-cols-12 gap-4 py-4 items-center hover:bg-gray-50">
+                            {/* User */}
                             <div className="col-span-3 flex items-center space-x-3">
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage src={ride.driver?.user?.avatar} alt={ride.driver?.user?.full_name} />
+                                    <AvatarImage src={user.avatar} alt={user.full_name} />
                                     <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
-                                        {getInitials(ride.driver?.user?.full_name)}
+                                        {getInitials(user.full_name)}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <p className="text-sm font-medium text-gray-900">
-                                        {ride.driver?.user?.full_name || 'N/A'}
+                                        {user.full_name || 'N/A'}
                                     </p>
                                     <p className="text-xs text-gray-500">
-                                        {ride.driver?.online ? '🟢 Online' : '⚪ Offline'}
+                                        ID: {user.id}
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Vehicle */}
-                            <div className="col-span-2">
-                                <p className="text-sm font-medium text-gray-900">{ride.driver?.vehicle_type || 'N/A'}</p>
-                                <p className="text-xs text-gray-500">{ride.driver?.vehicle_plate_number || 'N/A'}</p>
+                            {/* Email */}
+                            <div className="col-span-3">
+                                <p className="text-sm font-medium text-gray-900">{user.email || 'N/A'}</p>
                             </div>
 
-                            {/* Seats */}
+                            {/* Phone */}
                             <div className="col-span-2">
                                 <p className="text-sm font-medium text-gray-900">
-                                    {ride.seats_available} / {ride.pick_up + ride.drop_off} seats
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                    {ride.pick_up} pickup • {ride.drop_off} dropoff
+                                    {user.phone_number || 'N/A'}
                                 </p>
                             </div>
 
-                            {/* Price */}
+                            {/* Role */}
                             <div className="col-span-2">
                                 <p className="text-sm font-medium text-gray-900">
-                                    {formatPrice(ride.price_per_seat)}
+                                    {user.role || 'User'}
                                 </p>
-                                <p className="text-xs text-gray-500">per seat</p>
                             </div>
 
                             {/* Status */}
                             <div className="col-span-2">
-                                {getStatusBadge(ride.status || '')}
+                                {getStatusBadge(user.status || 'active')}
                                 <p className="text-xs text-gray-500 mt-1">
-                                    {formatDate(ride.created_at)}
+                                    {formatDate(user.created_at || '')}
                                 </p>
                             </div>
                         </div>
