@@ -15,6 +15,8 @@ const getStatusBadge = (status: string) => {
             return <Badge className="bg-red-100 text-red-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Cancelled</Badge>
         case "scheduled":
             return <Badge className="bg-amber-100 text-amber-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Scheduled</Badge>
+        case "documents submitted":
+            return <Badge className="bg-purple-100 text-purple-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">Documents Submitted</Badge>
         default:
             return <Badge className="bg-gray-100 text-gray-700 border-0 px-2.5 py-1 rounded-full text-xs font-medium">{status || 'N/A'}</Badge>
     }
@@ -30,11 +32,12 @@ const getInitials = (name?: string) => {
         .substring(0, 2);
 };
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
     try {
         return format(new Date(dateString), 'MMM d, yyyy h:mm a');
-    } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
         return 'Invalid date';
     }
 };
@@ -56,7 +59,7 @@ interface RidesTableListProps {
     onPageChange?: (page: number) => void;
 }
 
-export function RidesTableList({ rides, onManageClick, currentPage = 1, totalPages = 1, onPageChange }: RidesTableListProps) {
+export function RidesTableList({ rides, currentPage = 1, totalPages = 1, onPageChange }: RidesTableListProps) {
     return (
         <div className="w-full bg-[#FAFAFA] flex flex-col">
             <div className="px-6 py-3">
@@ -100,10 +103,10 @@ export function RidesTableList({ rides, onManageClick, currentPage = 1, totalPag
                             {/* Seats */}
                             <div className="col-span-2">
                                 <p className="text-sm font-medium text-gray-900">
-                                    {ride.seats_available} / {ride.pick_up + ride.drop_off} seats
+                                    {ride.seats_available} seats available
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                    {ride.pick_up} pickup • {ride.drop_off} dropoff
+                                    {ride.pick_up?.name || 'N/A'} → {ride.drop_off?.name || 'N/A'}
                                 </p>
                             </div>
 

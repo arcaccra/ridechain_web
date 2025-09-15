@@ -32,7 +32,7 @@ const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
     try {
         return format(new Date(dateString), 'MMM d, yyyy h:mm a');
-    } catch (e) {
+    } catch {
         return 'Invalid date';
     }
 };
@@ -112,6 +112,16 @@ export function UsersTableList({ users, onManageClick, currentPage = 1, totalPag
                                 <p className="text-xs text-gray-500 mt-1">
                                     {formatDate(user.created_at || '')}
                                 </p>
+                                {onManageClick && (
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        className="ml-2"
+                                        onClick={() => onManageClick(user.id)}
+                                    >
+                                        Manage
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     ))}
