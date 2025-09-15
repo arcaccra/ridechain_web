@@ -20,7 +20,7 @@ export default function DriverManagement() {
         navigate(`/drivers/${driver.id}`);
     }
 
-const { data, isLoading, isError } = useFetchData(`/apis/accounts/drivers/`, ["drivers"],
+    const { data, isLoading, isError } = useFetchData(`/apis/accounts/drivers/`, ["drivers"],
         {
             headers: {
                 'Content-Type': 'application/json',
@@ -29,13 +29,13 @@ const { data, isLoading, isError } = useFetchData(`/apis/accounts/drivers/`, ["d
     )
 
     if (isLoading) return <div>Loading...</div>
-if (isError) {
-    const errorMessage =
-      typeof isError === 'object' && true && 'message' in isError
-        ? (isError as { message: string }).message
-        : 'An unknown error occurred';
-    return <div>Error: {errorMessage}</div>;
-}
+    if (isError) {
+        const errorMessage =
+            typeof isError === 'object' && true && 'message' in isError
+                ? (isError as { message: string }).message
+                : 'An unknown error occurred';
+        return <div>Error: {errorMessage}</div>;
+    }
     if (!data) return <div>Error: No data</div>
 
     // Ensure data is an array of drivers or fallback to empty array
@@ -55,7 +55,6 @@ if (isError) {
             driver.user.email.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
-
     // Calculate pagination
     const totalPages = Math.ceil(filteredDrivers.length / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -67,7 +66,6 @@ if (isError) {
     const approvedDrivers = allDrivers.filter(d => d.status === "Approved").length;
     const approvedPercentage = totalDrivers > 0 ? Math.round((approvedDrivers / totalDrivers) * 100) : 0;
     const activeDrivers = allDrivers.filter(d => d.online).length;
-
 
     return (
         <div className="flex-1 p-8">
