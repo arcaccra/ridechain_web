@@ -5,20 +5,50 @@ import {Button} from "@/components/ui/button.tsx";
 import IDriver from "@/interfaces/Driver.ts";
 import {Badge} from "@/components/ui/badge.tsx";
 
+import {Input} from "@/components/ui/input.tsx";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
+
 interface IProps {
     drivers: IDriver[]
     onManageClick: (driver: IDriver) => void;
     currentPage?: number;
     totalPages?: number;
     onPageChange?: (page: number) => void;
+    searchQuery?: string;
+    onSearchChange?: (query: string) => void;
+    statusFilter?: string;
+    onStatusFilterChange?: (status: string) => void;
 }
 
 
-export default function DriversTableList({drivers, onManageClick, currentPage, totalPages, onPageChange}: IProps) {
+export default function DriversTableList({drivers, onManageClick, currentPage, totalPages, onPageChange, searchQuery, onSearchChange, statusFilter, onStatusFilterChange}: IProps) {
     return (
         <div className="w-full bg-white">
             <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Drivers Table</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900">Drivers Table</h2>
+                    <div className="flex items-center space-x-4">
+                        <Input
+                            placeholder="Search drivers..."
+                            value={searchQuery}
+                            onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                            className="w-64"
+                        />
+                        <Select value={statusFilter} onValueChange={(value) => onStatusFilterChange && onStatusFilterChange(value)}>
+                            <SelectTrigger className="w-48">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="Approved">Approved</SelectItem>
+                                <SelectItem value="Under Review">Under Review</SelectItem>
+                                <SelectItem value="Rejected">Rejected</SelectItem>
+                                <SelectItem value="Documents Submitted">Documents Submitted</SelectItem>
+                                <SelectItem value="Not Submitted">Not Submitted</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
 
                 <table className="w-full">
                     <thead>

@@ -7,55 +7,66 @@ import StatisticsCard from "@/components/StatisticsCard.tsx";
 import useFetchData from "@/hooks/useFetchData.tsx";
 
 export default function DriverManagement() {
-    const [selectedDriver, setSelectedDriver] = useState<IDriver | null>(null)
 
     const [searchQuery, setSearchQuery] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
     const [itemsPerPage] = useState(15)
     const [currentPage, setCurrentPage] = useState(1)
-    const [selectedTimeframe, setSelectedTimeframe] = useState("This Month")
-    const [selectedActiveTimeframe, setSelectedActiveTimeframe] = useState("Today")
     const [chartData] = useState([25, 40, 30, 45, 35, 55, 40, 60, 35, 45, 50, 40])
     const navigate = useNavigate();
 
-
-    // Function to generate avatar background color based on name
-    const generateAvatar = (name: string) => {
-        const colors = [
-            "bg-blue-500", "bg-red-500", "bg-green-500",
-            "bg-yellow-500", "bg-purple-500", "bg-pink-500",
-            "bg-indigo-500", "bg-teal-500"
-        ];
-
-        // Simple hash function to get consistent color for the same name
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-            hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
-
-        return colors[Math.abs(hash) % colors.length];
-    };
-
     const handleManageDriver = (driver: IDriver) => {
-        setSelectedDriver(driver);
         localStorage.setItem("selectedDriver", JSON.stringify(driver));
         navigate(`/drivers/${driver.id}`);
     }
 
-    const {data, isLoading, isError} = useFetchData(`/apis/accounts/drivers/`, ["drivers"],
-        {}, true, 1000 * 60 * 60 * 3
+const { data, isLoading, isError } = useFetchData(`/apis/accounts/drivers/`, ["drivers"],
+        {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }, true, 1000 * 60 * 60 * 3
     )
 
     if (isLoading) return <div>Loading...</div>
-    if (isError) return <div>Error: {(isError as any).message}</div>
+if (isError) {
+    const errorMessage =
+      typeof isError === 'object' && true && 'message' in isError
+        ? (isError as { message: string }).message
+        : 'An unknown error occurred';
+    return <div>Error: {errorMessage}</div>;
+}
     if (!data) return <div>Error: No data</div>
 
-    const allDrivers: IDriver[] = data || [];
+    // Ensure data is an array of drivers or fallback to empty array
+    const allDrivers: IDriver[] = Array.isArray(data) ? data : [];
+
+    // Filter and Search
+    const filteredDrivers = allDrivers
+        .filter((driver) => {
+            if (statusFilter === "all") return true;
+            /**
+             * @ts-ignore
+             */
+            return driver.status.toLowerCase() === statusFilter.toLowerCase();
+        })
+        .filter((driver) =>
+            driver.user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            driver.user.email.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+
     // Calculate pagination
-    const totalPages = Math.ceil(allDrivers.length / itemsPerPage)
+    const totalPages = Math.ceil(filteredDrivers.length / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
-    const currentDrivers = allDrivers.slice(startIndex, endIndex)
+    const currentDrivers = filteredDrivers.slice(startIndex, endIndex)
+
+    // Calculate statistics
+    const totalDrivers = allDrivers.length;
+    const approvedDrivers = allDrivers.filter(d => d.status === "Approved").length;
+    const approvedPercentage = totalDrivers > 0 ? Math.round((approvedDrivers / totalDrivers) * 100) : 0;
+    const activeDrivers = allDrivers.filter(d => d.online).length;
 
 
     return (
@@ -69,7 +80,7 @@ export default function DriverManagement() {
                         {/* Total Drivers Card */}
                         <StatisticsCard cardTitle={"Total Drivers"}
                                         statLabel={"All Registered Drivers"}
-                                        statValue={allDrivers.length.toString()} timeFrame={"Monthly"}
+                                        statValue={totalDrivers.toString()} timeFrame={"Monthly"}
                                         statComponent={<div className="relative w-28 h-28 mx-auto">
                                             <svg className="w-28 h-28 transform -rotate-90" viewBox="0 0 120 120">
                                                 <circle
@@ -87,12 +98,12 @@ export default function DriverManagement() {
                                                     fill="none"
                                                     stroke="#FFFFFF"
                                                     strokeWidth="6"
-                                                    strokeDasharray={`${72 * 2 * Math.PI * 45 / 100} ${2 * Math.PI * 45}`}
+                                                    strokeDasharray={`${approvedPercentage * 2 * Math.PI * 45 / 100} ${2 * Math.PI * 45}`}
                                                     strokeLinecap="round"
                                                 />
                                             </svg>
                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                <span className="text-2xl font-bold">72%</span>
+                                                <span className="text-2xl font-bold">{approvedPercentage}%</span>
                                             </div>
                                         </div>
                                         }/>
@@ -100,7 +111,7 @@ export default function DriverManagement() {
                         {/* Active Drivers Card */}
                         <StatisticsCard cardTitle={"Active Drivers"}
                                         statLabel={"Currently Online"}
-                                        statValue={allDrivers.filter(d => d.online).length.toString()} timeFrame={"24h"}
+                                        statValue={activeDrivers.toString()} timeFrame={"24h"}
                                         statComponent={<div className="h-16 flex items-end justify-between">
                                             {chartData.map((value, index) => (
                                                 <div
@@ -129,6 +140,10 @@ export default function DriverManagement() {
                             currentPage={currentPage}
                             totalPages={totalPages}
                             onPageChange={setCurrentPage}
+                            searchQuery={searchQuery}
+                            onSearchChange={setSearchQuery}
+                            statusFilter={statusFilter}
+                            onStatusFilterChange={setStatusFilter}
                         />
                     </div>
                 </div>
