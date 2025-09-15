@@ -1,12 +1,5 @@
 // import {IDocument} from "@/interfaces/Document.ts";
-
-export interface IUser {
-    id: number;
-    full_name: string;
-    email: string;
-    avatar: string;
-    phone_number: string;
-}
+import type { IUser } from "@/interfaces/User";
 
 export default interface IDriver {
     id: number;

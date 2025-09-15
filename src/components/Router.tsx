@@ -6,7 +6,7 @@ import DriverManagement from '../pages/DriverManagement';
 import RidesManagement from '../pages/RidesManagement';
 import PaymentsManagement from '../pages/PaymentsManagement';
 import DriverDetail from '../pages/DriverDetail';
-import UserManagement from '../pages/UserManagement';
+import UsersManagement from '../pages/UsersManagement';
 import Dashboard from './Dashboard';
 
 const AppRoutes = () => {
@@ -20,7 +20,7 @@ const AppRoutes = () => {
         <Route path="drivers/:id" element={<DriverDetail />} />
         <Route path="rides" element={<RidesManagement />} />
         <Route path="payments" element={<PaymentsManagement />} />
-        <Route path="users" element={<UserManagement />} />
+        <Route path="users" element={<UsersManagement />} />
       </Route>
     </Routes>
   );

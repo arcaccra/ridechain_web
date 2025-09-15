@@ -1,8 +1,9 @@
-import { UsersTableList, User } from "@/components/User/UsersTableList";
+import { UsersTableList } from "@/components/User/UsersTableList";
+import type { IUserTable } from "@/interfaces/User";
 import { useState } from "react";
 
-// Dummy user data
-const dummyUsers: User[] = [
+// Dummy user data (kept for local testing; router now uses UsersManagement)
+const dummyUsers: IUserTable[] = [
     {
         id: 1,
         full_name: "John Doe",

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
-import { IUser } from "@/interfaces/Driver";
+import { IUserTable } from "@/interfaces/User";
 
 const getStatusBadge = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -37,15 +37,8 @@ const formatDate = (dateString: string) => {
     }
 };
 
-// Extended user interface with additional properties for the table
-export interface User extends IUser {
-    created_at?: string;
-    status?: 'active' | 'inactive' | 'pending' | string;
-    role?: string;
-}
-
 interface UsersTableListProps {
-    users: User[];
+    users: IUserTable[];
     onManageClick?: (userId: number) => void;
     currentPage?: number;
     totalPages?: number;
