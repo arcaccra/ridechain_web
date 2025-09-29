@@ -17,16 +17,16 @@ export default function RidesManagement() {
   return (
     <div className="flex-1 p-8 h-full">
       <div className="flex gap-6 h-full">
-          {/* Rides Table Section - 40% width */}
-          <div className="w-[40%]">
+          {/* Rides Table Section - 50% width */}
+          <div className="w-[50%]">
               <div className="bg-gray-50 px-6 py-3 rounded-3xl h-full">
                   <h2 className="text-lg font-semibold text-gray-900 p-6">Real Time Rides</h2>
                   <RidesTableList rides={data ?? []} />
               </div>
           </div>
 
-        {/* Map View Section - 60% width */}
-        <div className="w-[60%]">
+        {/* Map View Section - 50% width */}
+        <div className="w-[50%]">
           <div className="bg-gray-50 p-6 rounded-3xl h-full">
               <div className="h-full">
                 <MapView />
