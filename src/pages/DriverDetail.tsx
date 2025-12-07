@@ -115,7 +115,7 @@ export default function DriverDetail() {
                                 <FileText className="h-5 w-5 text-slate-400" />
                                 <div>
                                     <p className="text-sm font-medium text-slate-500">KYC Status</p>
-                                    <div className="mt-1">{getStatusBadge(driver.kyc_status)}</div>
+                                    <div className="mt-1">{getStatusBadge(driver.kyc_status ?? 'unknown')}</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
