@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an instance of Axios
 const httpFetch = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: `${import.meta.env.VITE_API_URL}/apis`,
     headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

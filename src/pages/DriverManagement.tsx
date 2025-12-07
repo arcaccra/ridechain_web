@@ -4,6 +4,7 @@ import type IDriver from "@/interfaces/Driver.ts"
 import {useNavigate} from "react-router-dom";
 import DriversTableList from "@/components/Driver/DriversTableList.tsx";
 import useFetchData from "@/hooks/useFetchData.tsx";
+import StatisticsCard from "@/components/StatisticsCard";
 
 export default function DriverManagement() {
     const [searchQuery, setSearchQuery] = useState("")
@@ -17,7 +18,7 @@ export default function DriverManagement() {
         navigate(`/drivers/${driver.id}`);
     }
 
-    const {data, isLoading, isError} = useFetchData(`/apis/accounts/drivers/`, ["drivers"],
+    const {data, isLoading, isError} = useFetchData(`/accounts/drivers/`, ["drivers"],
         {}, true, 1000 * 60 * 60 * 3
     )
 
@@ -26,6 +27,12 @@ export default function DriverManagement() {
     if (!data) return <div>Error: No data</div>;
 
     const allDrivers: IDriver[] = Array.isArray(data) ? data : [];
+
+    // Overview stats
+    const totalDrivers = allDrivers.length;
+    const approvedDrivers = allDrivers.filter(d => d.status === 'Approved').length;
+    const underReviewDrivers = allDrivers.filter(d => d.status === 'Under Review').length;
+    const rejectedDrivers = allDrivers.filter(d => d.status === 'Rejected').length;
 
     // Filter logic
     const filteredDrivers = allDrivers
@@ -48,7 +55,10 @@ export default function DriverManagement() {
                 <div className="w-80">
                     <div className="bg-gray-50 p-6 rounded-3xl">
                         <h2 className="text-lg font-semibold text-gray-900 mb-6">Drivers Overview</h2>
-                        {/* ...StatisticsCard components... */}
+                        <StatisticsCard cardTitle="Total Drivers" statValue={String(totalDrivers)} statLabel="Registered drivers" />
+                        <StatisticsCard cardTitle="Approved" statValue={String(approvedDrivers)} statLabel="Drivers approved to operate" />
+                        <StatisticsCard cardTitle="Under Review" statValue={String(underReviewDrivers)} statLabel="Drivers pending review" />
+                        <StatisticsCard cardTitle="Rejected" statValue={String(rejectedDrivers)} statLabel="Drivers rejected" />
                     </div>
                 </div>
                 {/* Drivers Table Section */}
@@ -69,9 +79,9 @@ export default function DriverManagement() {
                                 className="border rounded px-2 py-1"
                             >
                                 <option value="all">All Statuses</option>
-                                <option value="approved">Approved</option>
-                                <option value="pending">Pending</option>
-                                <option value="rejected">Rejected</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Under Review">Under Review</option>
+                                <option value="Rejected">Rejected</option>
                             </select>
                         </div>
                         <DriversTableList

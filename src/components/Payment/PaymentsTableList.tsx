@@ -81,7 +81,7 @@ export function PaymentsTableList() {
                     <TableCell className="w-[15%] hidden md:table-cell py-2.5">
                         {getStatusBadge(payment.status)}
                     </TableCell>
-                    <TableCell className="w-[20%] text-right py-2.5 font-medium text-slate-800 text-sm">{`GHS ${payment.amount.toFixed(2)}`}</TableCell>
+                    <TableCell className="w-[20%] text-right py-2.5 font-medium text-slate-800 text-sm">{`₳ ${payment.amount.toFixed(2)}`}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

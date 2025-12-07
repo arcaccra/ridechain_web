@@ -7,7 +7,10 @@ import RidesManagement from '../pages/RidesManagement';
 import PaymentsManagement from '../pages/PaymentsManagement';
 import DriverDetail from '../pages/DriverDetail';
 import UsersManagement from '../pages/UsersManagement';
+import RideSearch from '../pages/RideSearch';
+import BookingPage from '../pages/BookingPage';
 import Dashboard from './Dashboard';
+import UserProfile from '../pages/UserProfile';
 
 const AppRoutes = () => {
   return (
@@ -21,6 +24,9 @@ const AppRoutes = () => {
         <Route path="rides" element={<RidesManagement />} />
         <Route path="payments" element={<PaymentsManagement />} />
         <Route path="users" element={<UsersManagement />} />
+        <Route path="search" element={<RideSearch />} />
+        <Route path="book/:rideId" element={<BookingPage />} />
+        <Route path="profile" element={<UserProfile />} />
       </Route>
     </Routes>
   );

@@ -3,58 +3,7 @@ import type { IUserTable } from "@/interfaces/User";
 import { useState } from "react";
 
 // Dummy user data (kept for local testing; router now uses UsersManagement)
-const dummyUsers: IUserTable[] = [
-    {
-        id: 1,
-        full_name: "John Doe",
-        email: "john.doe@example.com",
-        avatar: "",
-        phone_number: "0556535321",
-        status: "active",
-        role: "Admin",
-        created_at: "0244658796"
-    },
-    {
-        id: 2,
-        full_name: "Jane Smith",
-        email: "jane.smith@example.com",
-        avatar: "",
-        phone_number: "0244658736",
-        status: "active",
-        role: "User",
-        created_at: "2024-07-10T14:45:00Z"
-    },
-    {
-        id: 3,
-        full_name: "Robert Johnson",
-        email: "robert.johnson@example.com",
-        avatar: "",
-        phone_number: "0244658888",
-        status: "inactive",
-        role: "User",
-        created_at: "2024-06-25T09:15:00Z"
-    },
-    {
-        id: 4,
-        full_name: "Emily Davis",
-        email: "emily.davis@example.com",
-        avatar: "",
-        phone_number: "0244658677",
-        status: "pending",
-        role: "Manager",
-        created_at: "2024-08-01T11:20:00Z"
-    },
-    {
-        id: 5,
-        full_name: "Michael Wilson",
-        email: "michael.wilson@example.com",
-        avatar: "",
-        phone_number: "0244658473",
-        status: "active",
-        role: "User",
-        created_at: "2024-07-20T16:10:00Z"
-    }
-];
+const dummyUsers: IUserTable[] = [];
 
 // Number of users per page
 const USERS_PER_PAGE = 3;

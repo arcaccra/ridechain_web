@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { IUserTable } from "@/interfaces/User";
+import { Pencil, Copy, Trash } from "lucide-react";
 
 const getStatusBadge = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -50,20 +51,22 @@ export function UsersTableList({ users, onManageClick, currentPage = 1, totalPag
         <div className="w-full bg-[#FAFAFA] flex flex-col">
             <div className="px-6 py-3">
                 {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 pb-3 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <div className="col-span-3">USER</div>
-                    <div className="col-span-3">EMAIL</div>
+                <div className="grid grid-cols-12 gap-4 pb-3 border-b border-gray-200 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
+                    <div className="col-span-2">USER</div>
+                    <div className="col-span-2">EMAIL</div>
                     <div className="col-span-2">PHONE</div>
-                    <div className="col-span-2">ROLE</div>
+                    <div className="col-span-1">ROLE</div>
                     <div className="col-span-2">STATUS</div>
+                    <div className="col-span-1">DATE JOINED</div>
+                    <div className="col-span-2 text-right">ACTIONS</div>
                 </div>
 
                 {/* Table Body */}
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-gray-200">
                     {users.map((user) => (
                         <div key={user.id} className="grid grid-cols-12 gap-4 py-4 items-center hover:bg-gray-50">
                             {/* User */}
-                            <div className="col-span-3 flex items-center space-x-3">
+                            <div className="col-span-2 flex items-center space-x-3">
                                 <Avatar className="h-10 w-10">
                                     <AvatarImage src={user.avatar} alt={user.full_name} />
                                     <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
@@ -75,14 +78,15 @@ export function UsersTableList({ users, onManageClick, currentPage = 1, totalPag
                                         {user.full_name || 'N/A'}
                                     </p>
                                     <p className="text-xs text-gray-500">
-                                        ID: {user.id}
+                                        {user.country || 'N/A'}
                                     </p>
                                 </div>
                             </div>
 
                             {/* Email */}
-                            <div className="col-span-3">
+                            <div className="col-span-2">
                                 <p className="text-sm font-medium text-gray-900">{user.email || 'N/A'}</p>
+                                <p className="text-[10px] text-gray-500">{user.current_location || 'N/A'}</p>
                             </div>
 
                             {/* Phone */}
@@ -93,7 +97,7 @@ export function UsersTableList({ users, onManageClick, currentPage = 1, totalPag
                             </div>
 
                             {/* Role */}
-                            <div className="col-span-2">
+                            <div className="col-span-1">
                                 <p className="text-sm font-medium text-gray-900">
                                     {user.role || 'User'}
                                 </p>
@@ -102,19 +106,35 @@ export function UsersTableList({ users, onManageClick, currentPage = 1, totalPag
                             {/* Status */}
                             <div className="col-span-2">
                                 {getStatusBadge(user.status || 'active')}
-                                <p className="text-xs text-gray-500 mt-1">
+                            </div>
+                            {/* Date Joined */}
+                            <div className="col-span-1">
+                                <p className="text-sm font-medium text-gray-900">
                                     {formatDate(user.created_at || '')}
                                 </p>
-                                {onManageClick && (
+                            </div>
+                            {/* Actions */}
+                            <div className="col-span-2 text-right">
+                                <div className="flex items-center justify-end">
+                                    {onManageClick && (
+                                        <Button
+                                            onClick={() => onManageClick(user.id)}
+                                            className="flex items-center shadow-0 p-0.5"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                     <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        className="ml-2"
-                                        onClick={() => onManageClick(user.id)}
+                                        className="flex items-center shadow-0 p-0.5"
                                     >
-                                        Manage
+                                        <Copy className="h-4 w-4" />
                                     </Button>
-                                )}
+                                    <Button
+                                        className="flex items-center shadow-0 p-0.5"
+                                    >
+                                        <Trash className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     ))}

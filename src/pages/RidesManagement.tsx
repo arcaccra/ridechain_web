@@ -4,7 +4,7 @@ import { Ride } from "@/interfaces/Ride";
 
 
 export default function RidesManagement() {
-    const {data, isLoading, isError} = useFetchData<Ride[]>(`/apis/rides_apis/rides`, ["rides"],
+    const {data, isLoading, isError} = useFetchData<Ride[]>(`/rides_apis/rides`, ["rides"],
         {}, true, 1000 * 60 * 60 * 3
     )
 

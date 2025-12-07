@@ -1,16 +1,12 @@
 
-import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
-interface User {
-  full_name: string;
-  email: string;
-  avatar: string;
-}
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import type { IUser } from '@/interfaces/User';
 
 interface AuthContextType {
   token: string | null;
-  user: User | null;
-  login: (token: string, user: User) => void;
+  user: IUser | null;
+  login: (token: string, user: IUser) => void;
   logout: () => void;
 }
 
@@ -28,7 +24,7 @@ const safeJSONParse = (item: string | null) => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-  const [user, setUser] = useState<User | null>(safeJSONParse(localStorage.getItem('user')));
+  const [user, setUser] = useState<IUser | null>(safeJSONParse(localStorage.getItem('user')));
 
   useEffect(() => {
     if (token) {
@@ -39,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [token]);
 
-  const login = (newToken: string, newUser: User) => {
+  const login = (newToken: string, newUser: IUser) => {
     setToken(newToken);
     setUser(newUser);
     localStorage.setItem('user', JSON.stringify(newUser));
