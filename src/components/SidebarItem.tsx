@@ -10,7 +10,7 @@ interface SidebarItemProps {
 export default function SidebarItem({ icon, label, path, isActive = false }: SidebarItemProps) {
     // If icon is a valid React element, clone it and inject className for consistent sizing & color
     const coloredIcon = React.isValidElement(icon)
-      ? React.cloneElement(icon as React.ReactElement, {
+      ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
           className: `h-5 w-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-violet-300'}`,
         })
       : icon;

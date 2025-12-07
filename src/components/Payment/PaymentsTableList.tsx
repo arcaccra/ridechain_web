@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Payment } from "@/interfaces/Payment";
-import { Button } from "@/components/ui/button";
+
 
 const payments: Payment[] = [
     {

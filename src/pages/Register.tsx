@@ -232,7 +232,7 @@ const rydeViolet = '#8f2fff';
             full_name: data.user?.full_name || formData.full_name,
             email: data.user?.email || formData.email,
             avatar: data.user?.avatar
-          });
+          } as import('@/interfaces/User').IUser);
           navigate('/');
         } else {
           navigate('/login', { state: { message: 'Registration successful! Please log in.' } });

@@ -216,7 +216,6 @@ export default function RideSearch() {
             {/* Map Background */}
             <div className="absolute inset-0 z-0">
                 <MapContainer 
-                    // @ts-expect-error - center prop exists in runtime but types are strict
                     center={defaultCenter} 
                     zoom={13} 
                     style={{ height: '100%', width: '100%' }}
@@ -232,7 +231,6 @@ export default function RideSearch() {
                     {userLocation && (
                         <Marker 
                             position={userLocation} 
-                            // @ts-expect-error - icon prop exists
                             icon={userLocationIcon}
                         >
                             <Popup>You are here</Popup>
@@ -247,10 +245,8 @@ export default function RideSearch() {
                             <Marker 
                                 key={ride.uuid} 
                                 position={coords} 
-                                // @ts-expect-error - icon prop exists
                                 icon={pickupIcon}
                             >
-                                {/* @ts-expect-error - className prop exists in runtime */}
                                 <Popup className="min-w-[300px]">
                                     <div className="p-1">
                                         <div className="flex justify-between items-start mb-2">

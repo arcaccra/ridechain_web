@@ -1,5 +1,5 @@
-import React from 'react';
-import { Check, Clock, X, FileText, Pencil, ChevronLeft, ChevronRight, Users, Truck } from 'lucide-react';
+
+import { Check, Clock, X, FileText, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import IDriver from '@/interfaces/Driver.ts';

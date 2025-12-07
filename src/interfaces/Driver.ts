@@ -12,5 +12,6 @@ export default interface IDriver {
     date_created: string;
     date_updated: string;
     online: boolean;
+    kyc_status?: string;
     status: "Approved" | "Under Review" | "Rejected" | "Documents Submitted" | "Not Submitted";
 }

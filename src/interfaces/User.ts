@@ -43,6 +43,8 @@ export interface IDriver {
     id_type?: string;
     id_number?: string;
     id_image?: string;
+  created_at?: string;
+  kyc_status?: string;
 }
 
 export interface IRide {
@@ -69,6 +71,7 @@ export interface IUser {
   current_location?: [number, number] | null;
   is_active?: boolean;
   driver?: IDriver;
+  created_at?: string;
   user_rides?: IRide[];
 }
 
