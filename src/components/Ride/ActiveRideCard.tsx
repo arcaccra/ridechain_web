@@ -130,7 +130,7 @@ export function ActiveRideCard({ ride, onClick }: ActiveRideCardProps) {
                         {ride.driver.vehicle_image && (
                             <div className="h-8 w-12 rounded overflow-hidden border border-gray-100">
                                 <img 
-                                    src={ride.driver.vehicle_image} 
+                                    src={`https://app.arcaccra.com${ride.driver.vehicle_image}`} 
                                     alt="Car" 
                                     className="h-full w-full object-cover"
                                 />

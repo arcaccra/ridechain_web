@@ -7,9 +7,11 @@ import { Mail, User, Phone, MapPin, Wallet, Globe, Copy, Eye, EyeOff, Edit, Car,
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
 import type { IWallet } from "@/interfaces/Wallet";
-import type { IRide } from "@/interfaces/User";
+import type { IRide, IUser } from "@/interfaces/User";
 import { PulsingIcon } from "@/components/ui/PulsingIcon";
 import { format } from 'date-fns';
+import { CreateRideModal } from "@/components/Ride/CreateRideModal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function UserProfile() {
     const { user } = useAuth();
@@ -18,6 +20,8 @@ export default function UserProfile() {
     const [showFullAddress, setShowFullAddress] = useState(false);
     const [copiedAddress, setCopiedAddress] = useState(false);
     const [rides, setRides] = useState<IRide[]>([]);
+    const [userProfile, setUserProfile] = useState<IUser | null>(user);
+    const [createRideOpen, setCreateRideOpen] = useState(false);
 
     // Fetch wallet data
     useEffect(() => {
@@ -29,15 +33,26 @@ export default function UserProfile() {
 
             try {
                 const response = await api.get('/accounts/wallets/');
+                
+                if (!response.data) {
+                    setWallet(null);
+                    return;
+                }
+
                 const userWallet = Array.isArray(response.data) 
-                    ? response.data.find((w: IWallet) => w.user.id === user.id)
+                    ? response.data.find((w: IWallet) => w?.user?.id === user.id)
                     : response.data;
                 
-                if (userWallet) {
+                // Validate wallet structure to prevent crashes
+                if (userWallet && userWallet.balance && userWallet.address) {
                     setWallet(userWallet);
+                } else {
+                    console.warn("Invalid wallet data found, setting to null");
+                    setWallet(null);
                 }
             } catch (error) {
                 console.error('Error fetching wallet:', error);
+                setWallet(null);
             } finally {
                 setWalletLoading(false);
             }
@@ -53,8 +68,13 @@ export default function UserProfile() {
 
             try {
                 const response = await api.get(`/accounts/users/${user.id}/`);
-                if (response.data && response.data.user_rides) {
-                    setRides(response.data.user_rides);
+                if (response.data) {
+                    // Update local profile state with fresh data
+                    setUserProfile(response.data);
+                    
+                    if (response.data.user_rides) {
+                        setRides(response.data.user_rides);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching rides:', error);
@@ -63,6 +83,22 @@ export default function UserProfile() {
 
         fetchRides();
     }, [user?.id]);
+
+    const refreshRides = async () => {
+        if (!user?.id) return;
+        try {
+            const response = await api.get(`/accounts/users/${user.id}/`);
+            if (response.data) {
+                setUserProfile(response.data); // Keep profile in sync
+                
+                if (response.data.user_rides) {
+                    setRides(response.data.user_rides);
+                }
+            }
+        } catch (error) {
+            console.error('Error refreshing rides:', error);
+        }
+    };
 
     const truncateAddress = (address: string) => {
         if (!address) return '';
@@ -372,43 +408,52 @@ export default function UserProfile() {
                         </Card>
 
                         {/* Driver Status */}
-                        {user.driver && (
+                        {userProfile?.driver && (
                             <Card className="border border-gray-200 bg-white rounded-3xl py-0">
                                 <CardContent className="p-6">
-                                    <h3 className="text-lg font-semibold mb-6 text-gray-900 flex items-center gap-2">
-                                        <Car className="w-5 h-5 text-violet-600" />
-                                        Driver Information
-                                    </h3>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                            <Car className="w-5 h-5 text-violet-600" />
+                                            Driver Information
+                                        </h3>
+                                        <Button 
+                                            size="sm" 
+                                            onClick={() => setCreateRideOpen(true)}
+                                            className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl"
+                                        >
+                                            Create Trip
+                                        </Button>
+                                    </div>
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium text-gray-700">Status</span>
-                                            {getDriverStatusBadge(user.driver.status)}
+                                            {getDriverStatusBadge(userProfile.driver.status)}
                                         </div>
                                         
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="p-4 rounded-2xl bg-violet-50/50 border border-violet-100">
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="p-3 rounded-2xl bg-violet-50/50 border border-violet-100">
                                                 <p className="text-xs text-violet-600 font-medium mb-1">Vehicle Type</p>
-                                                <p className="text-sm font-medium text-gray-900">{user.driver.vehicle_type}</p>
+                                                <p className="text-sm font-medium text-gray-900">{userProfile.driver.vehicle_type}</p>
                                             </div>
-                                            <div className="p-4 rounded-2xl bg-violet-50/50 border border-violet-100">
+                                            <div className="p-3 rounded-2xl bg-violet-50/50 border border-violet-100">
                                                 <p className="text-xs text-violet-600 font-medium mb-1">Vehicle Color</p>
-                                                <p className="text-sm font-medium text-gray-900">{user.driver.vehicle_color}</p>
+                                                <p className="text-sm font-medium text-gray-900">{userProfile.driver.vehicle_color}</p>
                                             </div>
-                                            <div className="p-4 rounded-2xl bg-violet-50/50 border border-violet-100">
+                                            <div className="p-3 rounded-2xl bg-violet-50/50 border border-violet-100">
                                                 <p className="text-xs text-violet-600 font-medium mb-1">Plate Number</p>
-                                                <p className="text-sm font-medium text-gray-900">{user.driver.vehicle_plate_number}</p>
+                                                <p className="text-sm font-medium text-gray-900">{userProfile.driver.vehicle_plate_number}</p>
                                             </div>
-                                            <div className="p-4 rounded-2xl bg-violet-50/50 border border-violet-100">
+                                            <div className="p-3 rounded-2xl bg-violet-50/50 border border-violet-100">
                                                 <p className="text-xs text-violet-600 font-medium mb-1">ID Type</p>
-                                                <p className="text-sm font-medium text-gray-900">{user.driver.id_type.replace('_', ' ')}</p>
+                                                <p className="text-sm font-medium text-gray-900">{userProfile.driver.id_type?.replace('_', ' ') || 'N/A'}</p>
                                             </div>
                                         </div>
 
-                                        {user.driver.vehicle_image && (
+                                        {userProfile.driver.vehicle_image && (
                                             <div>
                                                 <p className="text-xs text-gray-500 mb-2">Vehicle Image</p>
                                                 <img 
-                                                    src={user.driver.vehicle_image} 
+                                                    src={`https://app.arcaccra.com${userProfile.driver.vehicle_image}`} 
                                                     alt="Vehicle" 
                                                     className="w-full h-48 object-cover rounded-lg"
                                                 />
@@ -419,142 +464,177 @@ export default function UserProfile() {
                             </Card>
                         )}
 
-                        {/* Active Rides */}
-                        {activeRides.length > 0 && (
-                            <Card className="border border-gray-200 bg-white rounded-3xl py-0">
-                                <CardContent className="p-6">
-                                    <h3 className="text-lg font-semibold mb-6 text-gray-900 flex items-center gap-2">
-                                        <PulsingIcon color="bg-green-500" size={3} />
-                                        Active Rides ({activeRides.length})
-                                    </h3>
-                                    <div className="space-y-3">
-                                        {activeRides.map((ride) => (
-                                            <div key={ride.uuid} className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <Avatar className="h-8 w-8">
-                                                            <AvatarImage src={ride.driver.user?.avatar} alt={ride.driver.user?.full_name} />
-                                                            <AvatarFallback className="bg-violet-100 text-violet-600 text-xs font-medium">
-                                                                {ride.driver.user?.full_name?.charAt(0).toUpperCase()}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <p className="font-semibold text-gray-900 text-xs">{ride.driver.user?.full_name || 'Unknown Driver'}</p>
-                                                            <p className="text-[10px] text-gray-500">{ride.driver.vehicle_type} - {ride.driver.vehicle_color}</p>
-                                                        </div>
-                                                    </div>
-                                                    {getRideStatusBadge(ride.status, true)}
-                                                </div>
+                        <Tabs defaultValue="active" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 mb-4 bg-gray-100 p-1 rounded-xl">
+                                <TabsTrigger 
+                                    value="active"
+                                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                                >
+                                    Active Rides ({activeRides.length})
+                                </TabsTrigger>
+                                <TabsTrigger 
+                                    value="history"
+                                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                                >
+                                    Ride History ({rideHistory.length})
+                                </TabsTrigger>
+                            </TabsList>
 
-                                                <div className="space-y-1.5 mb-2">
-                                                    <div className="flex items-start gap-1.5">
-                                                        <MapPin className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
-                                                        <div className="flex-1">
-                                                            <p className="text-xs font-medium text-gray-900">{ride.pick_up.name}</p>
-                                                            <p className="text-[10px] text-gray-500">Pickup</p>
+                            <TabsContent value="active">
+                                {/* Active Rides */}
+                                {activeRides.length > 0 ? (
+                                    <Card className="border border-gray-200 bg-white rounded-3xl py-0">
+                                        <CardContent className="p-6">
+                                            <h3 className="text-lg font-semibold mb-6 text-gray-900 flex items-center gap-2">
+                                                <PulsingIcon color="bg-green-500" size={3} />
+                                                Active Rides
+                                            </h3>
+                                            <div className="space-y-3">
+                                                {activeRides.map((ride) => (
+                                                    <div key={ride.uuid} className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                                                        <div className="flex items-start justify-between mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <Avatar className="h-8 w-8">
+                                                                    <AvatarImage src={ride.driver.user?.avatar} alt={ride.driver.user?.full_name} />
+                                                                    <AvatarFallback className="bg-violet-100 text-violet-600 text-xs font-medium">
+                                                                        {ride.driver.user?.full_name?.charAt(0).toUpperCase()}
+                                                                    </AvatarFallback>
+                                                                </Avatar>
+                                                                <div>
+                                                                    <p className="font-semibold text-gray-900 text-xs">{ride.driver.user?.full_name || 'Unknown Driver'}</p>
+                                                                    <p className="text-[10px] text-gray-500">{ride.driver.vehicle_type} - {ride.driver.vehicle_color}</p>
+                                                                </div>
+                                                            </div>
+                                                            {getRideStatusBadge(ride.status, true)}
                                                         </div>
-                                                    </div>
-                                                    <div className="flex items-start gap-1.5">
-                                                        <MapPin className="h-3 w-3 text-red-600 mt-0.5 flex-shrink-0" />
-                                                        <div className="flex-1">
-                                                            <p className="text-xs font-medium text-gray-900">{ride.drop_off.name}</p>
-                                                            <p className="text-[10px] text-gray-500">Dropoff</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
 
-                                                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Clock className="h-3 w-3 text-gray-400" />
-                                                        <div>
-                                                            <p className="text-[10px] text-gray-500">Departure</p>
-                                                            <p className="text-xs font-medium text-gray-900">{formatDateTime(ride.departure_time)}</p>
+                                                        <div className="space-y-1.5 mb-2">
+                                                            <div className="flex items-start gap-1.5">
+                                                                <MapPin className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
+                                                                <div className="flex-1">
+                                                                    <p className="text-xs font-medium text-gray-900">{ride.pick_up.name}</p>
+                                                                    <p className="text-[10px] text-gray-500">Pickup</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-start gap-1.5">
+                                                                <MapPin className="h-3 w-3 text-red-600 mt-0.5 flex-shrink-0" />
+                                                                <div className="flex-1">
+                                                                    <p className="text-xs font-medium text-gray-900">{ride.drop_off.name}</p>
+                                                                    <p className="text-[10px] text-gray-500">Dropoff</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <Clock className="h-3 w-3 text-gray-400" />
+                                                                <div>
+                                                                    <p className="text-[10px] text-gray-500">Departure</p>
+                                                                    <p className="text-xs font-medium text-gray-900">{formatDateTime(ride.departure_time || '')}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5">
+                                                                <Wallet className="h-3 w-3 text-gray-400" />
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500">Price</p>
+                                                                    <p className="text-sm font-medium text-violet-600">₳{ride.price_per_seat}</p>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Wallet className="h-3 w-3 text-gray-400" />
-                                                        <div>
-                                                            <p className="text-xs text-gray-500">Price</p>
-                                                            <p className="text-sm font-medium text-violet-600">₳{ride.price_per_seat}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                ))}
                                             </div>
-                                        ))}
+                                        </CardContent>
+                                    </Card>
+                                ) : (
+                                    <div className="text-center py-8 bg-gray-50 rounded-3xl border border-gray-200 border-dashed">
+                                        <p className="text-gray-500 text-sm">No active rides found</p>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        )}
+                                )}
+                            </TabsContent>
 
-                        {/* Ride History */}
-                        {rideHistory.length > 0 && (
-                            <Card className="border border-gray-200 bg-white rounded-3xl py-0">
-                                <CardContent className="p-6">
-                                    <h3 className="text-lg font-semibold mb-6 text-gray-900 flex items-center gap-2">
-                                        <Calendar className="w-5 h-5 text-gray-600" />
-                                        Ride History ({rideHistory.length})
-                                    </h3>
-                                    <div className="space-y-4">
-                                        {rideHistory.map((ride) => (
-                                            <div key={ride.uuid} className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
-                                                <div className="flex items-start justify-between mb-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar className="h-10 w-10">
-                                                            <AvatarImage src={ride.driver.user?.avatar} alt={ride.driver.user?.full_name} />
-                                                            <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
-                                                                {ride.driver.user?.full_name?.charAt(0).toUpperCase()}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <p className="font-semibold text-gray-900 text-sm">{ride.driver.user?.full_name || 'Unknown Driver'}</p>
-                                                            <p className="text-xs text-gray-500">{ride.driver.vehicle_type} - {ride.driver.vehicle_color}</p>
+                            <TabsContent value="history">
+                                {/* Ride History */}
+                                {rideHistory.length > 0 ? (
+                                    <Card className="border border-gray-200 bg-white rounded-3xl py-0">
+                                        <CardContent className="p-6">
+                                            <h3 className="text-lg font-semibold mb-6 text-gray-900 flex items-center gap-2">
+                                                <Calendar className="w-5 h-5 text-gray-600" />
+                                                Ride History
+                                            </h3>
+                                            <div className="space-y-4">
+                                                {rideHistory.map((ride) => (
+                                                    <div key={ride.uuid} className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
+                                                        <div className="flex items-start justify-between mb-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <Avatar className="h-10 w-10">
+                                                                    <AvatarImage src={ride.driver.user?.avatar} alt={ride.driver.user?.full_name} />
+                                                                    <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
+                                                                        {ride.driver.user?.full_name?.charAt(0).toUpperCase()}
+                                                                    </AvatarFallback>
+                                                                </Avatar>
+                                                                <div>
+                                                                    <p className="font-semibold text-gray-900 text-sm">{ride.driver.user?.full_name || 'Unknown Driver'}</p>
+                                                                    <p className="text-xs text-gray-500">{ride.driver.vehicle_type} - {ride.driver.vehicle_color}</p>
+                                                                </div>
+                                                            </div>
+                                                            {getRideStatusBadge(ride.status, false)}
                                                         </div>
-                                                    </div>
-                                                    {getRideStatusBadge(ride.status, false)}
-                                                </div>
 
-                                                <div className="space-y-2 mb-3">
-                                                    <div className="flex items-start gap-2">
-                                                        <MapPin className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                                        <div className="flex-1">
-                                                            <p className="text-sm font-medium text-gray-900">{ride.pick_up.name}</p>
-                                                            <p className="text-xs text-gray-500">Pickup</p>
+                                                        <div className="space-y-2 mb-3">
+                                                            <div className="flex items-start gap-2">
+                                                                <MapPin className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm font-medium text-gray-900">{ride.pick_up.name}</p>
+                                                                    <p className="text-xs text-gray-500">Pickup</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-start gap-2">
+                                                                <MapPin className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm font-medium text-gray-900">{ride.drop_off.name}</p>
+                                                                    <p className="text-xs text-gray-500">Dropoff</p>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="flex items-start gap-2">
-                                                        <MapPin className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                                                        <div className="flex-1">
-                                                            <p className="text-sm font-medium text-gray-900">{ride.drop_off.name}</p>
-                                                            <p className="text-xs text-gray-500">Dropoff</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
 
-                                                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200">
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock className="h-4 w-4 text-gray-400" />
-                                                        <div>
-                                                            <p className="text-xs text-gray-500">Departure</p>
-                                                            <p className="text-sm font-medium text-gray-900">{formatDateTime(ride.departure_time)}</p>
+                                                        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200">
+                                                            <div className="flex items-center gap-2">
+                                                                <Clock className="h-4 w-4 text-gray-400" />
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500">Departure</p>
+                                                                    <p className="text-sm font-medium text-gray-900">{formatDateTime(ride.departure_time || '')}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <Wallet className="h-4 w-4 text-gray-400" />
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500">Price</p>
+                                                                    <p className="text-sm font-medium text-gray-600">₳{ride.price_per_seat}</p>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Wallet className="h-4 w-4 text-gray-400" />
-                                                        <div>
-                                                            <p className="text-xs text-gray-500">Price</p>
-                                                            <p className="text-sm font-medium text-gray-600">₳{ride.price_per_seat}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                ))}
                                             </div>
-                                        ))}
+                                        </CardContent>
+                                    </Card>
+                                ) : (
+                                    <div className="text-center py-8 bg-gray-50 rounded-3xl border border-gray-200 border-dashed">
+                                        <p className="text-gray-500 text-sm">No ride history found</p>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        )}
+                                )}
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </div>
             </div>
+            
+            <CreateRideModal 
+                open={createRideOpen} 
+                onOpenChange={setCreateRideOpen}
+                onRideCreated={refreshRides}
+            />
         </div>
     );
 }

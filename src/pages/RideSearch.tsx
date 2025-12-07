@@ -133,14 +133,10 @@ export default function RideSearch() {
                         const status = ride.status.toLowerCase();
                         return status === 'requested' || status === 'in progress' || status === 'in_progress';
                     }).sort((a: IRide, b: IRide) => {
-                        // Prioritize 'in progress' rides
-                        const statusA = a.status.toLowerCase().replace('_', ' ');
-                        const statusB = b.status.toLowerCase().replace('_', ' ');
-                        if (statusA === 'in progress' && statusB !== 'in progress') return -1;
-                        if (statusA !== 'in progress' && statusB === 'in progress') return 1;
-                        return 0;
+                        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
                     });
-                    setActiveUserRides(active);
+                    // Only show the latest active ride
+                    setActiveUserRides(active.length > 0 ? [active[0]] : []);
                 }
             } catch (error) {
                 console.error('Error fetching user rides:', error);

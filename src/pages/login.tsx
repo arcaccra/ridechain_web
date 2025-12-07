@@ -160,8 +160,8 @@ const Login = () => {
                             </div>
                             <div className="space-y-4">
                                 <h2 className="text-3xl font-bold leading-tight">
-                                    400K+ users. 50M+ AI
-                                    <br/> generated graphics.
+                                    Decetralising Ride Sharing
+                                    <br/>in Ghana with Cardano
                                 </h2>
                                 <button type="button"
                                         className="self-start text-xs bg-[#8f2fff]/20 text-[#c7a4ff] border border-[#8f2fff]/30 rounded-full px-3 py-1 hover:bg-[#8f2fff]/30 transition">
