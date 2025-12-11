@@ -71,6 +71,16 @@ DID-01 — Decentralised Identity & Verifiable Credentials (summary)
   - Implement revocation monitoring and live status checks in production.
   - Establish trust registry / issuer governance.
 
+REP-01 — Reputation System (summary)
+
+- Status: Implemented (Off-chain for MVP).
+- Architecture:
+  - Ratings and reviews stored in centralized database.
+  - Decision rationale: Kept offline to ensure smooth UX. On-chain storage would require a transaction for every rating, introducing unnecessary friction and cost for the user.
+- What was validated: Rating submission, storage, and retrieval flows.
+- Production next steps:
+  - Explore periodic anchoring of reputation scores on-chain (rollups) to provide verifiability without per-action transactions.
+
 Performance & Security highlights (short)
 
 - Map stress testing and server-side clustering considered; region-based loading used in Flutter for large sets.
