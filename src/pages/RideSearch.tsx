@@ -12,8 +12,11 @@ import 'leaflet/dist/leaflet.css';
 import { FloatingToast } from '@/components/ui/floating-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { ActiveRideCard } from '@/components/Ride/ActiveRideCard';
+import { RateRideModal } from '@/components/Ride/RateRideModal';
 import type { IRide, ILocation } from '@/interfaces/User';
-import { AnimatePresence } from 'framer-motion';
+import type { IRating } from '@/interfaces/Rating';
+import { AnimatePresence, motion } from 'framer-motion';
+import { X, Star } from 'lucide-react';
 
 // Custom Icons
 const pickupIcon = L.divIcon({
@@ -100,6 +103,9 @@ export default function RideSearch() {
     
     const [rides, setRides] = useState<IRide[]>([]);
     const [activeUserRides, setActiveUserRides] = useState<IRide[]>([]);
+    const [unratedRide, setUnratedRide] = useState<IRide | null>(null);
+    const [ratingRide, setRatingRide] = useState<IRide | null>(null); // For the modal
+    const [showUnratedPrompt, setShowUnratedPrompt] = useState(false);
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -123,29 +129,60 @@ export default function RideSearch() {
     }, []);
 
     // Fetch user's active rides
+    // Fetch user rides and ratings to check for unrated completed rides
     useEffect(() => {
-        const fetchUserRides = async () => {
+        const checkUnratedRides = async () => {
             if (!user?.id) return;
             try {
-                const response = await api.get(`/accounts/users/${user.id}/`);
-                if (response.data.user_rides) {
-                    const active = response.data.user_rides.filter((ride: IRide) => {
+                // 1. Fetch User Rides
+                const ridesResponse = await api.get(`/accounts/users/${user.id}/`);
+                let allRides: IRide[] = [];
+                if (ridesResponse.data.user_rides) {
+                    allRides = ridesResponse.data.user_rides;
+                    
+                    // Filter for Active Rides
+                    const active = allRides.filter((ride: IRide) => {
                         const status = ride.status.toLowerCase();
                         return status === 'requested' || status === 'in progress' || status === 'in_progress';
                     }).sort((a: IRide, b: IRide) => {
                         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
                     });
-                    // Only show the latest active ride
                     setActiveUserRides(active.length > 0 ? [active[0]] : []);
                 }
+
+                // 2. Fetch User Ratings
+                const ratingsResponse = await api.get('/book_rate_apis/ratings/');
+                let ratingsData: IRating[] = [];
+                if (Array.isArray(ratingsResponse.data)) {
+                    ratingsData = ratingsResponse.data;
+                } else if (ratingsResponse.data && Array.isArray(ratingsResponse.data.results)) {
+                    ratingsData = ratingsResponse.data.results;
+                }
+                const ratedRideIds = new Set(ratingsData.map(r => r.ride));
+
+                // 3. Find Latest Unrated Completed Ride
+                // Filter for completed rides that are NOT in ratedRideIds
+                const unrated = allRides.filter(ride => 
+                    ride.status.toLowerCase() === 'completed' && 
+                    !ratedRideIds.has(ride.uuid)
+                ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+                if (unrated.length > 0) {
+                    setUnratedRide(unrated[0]);
+                    setShowUnratedPrompt(true);
+                } else {
+                    setUnratedRide(null);
+                    setShowUnratedPrompt(false);
+                }
+
             } catch (error) {
-                console.error('Error fetching user rides:', error);
+                console.error('Error checking unrated rides:', error);
             }
         };
 
-        fetchUserRides();
+        checkUnratedRides();
         // Poll for updates every 30 seconds
-        const interval = setInterval(fetchUserRides, 30000);
+        const interval = setInterval(checkUnratedRides, 30000);
         return () => clearInterval(interval);
     }, [user?.id]);
 
@@ -209,6 +246,17 @@ export default function RideSearch() {
         } finally {
             setLoading(false);
         }
+    };
+    const handleDismissPrompt = () => {
+        setShowUnratedPrompt(false);
+        // Optional: Save to localStorage to persist dismissal if needed
+    };
+
+    const handleRateSuccess = () => {
+        setShowUnratedPrompt(false);
+        setUnratedRide(null);
+        setRatingRide(null);
+        // Re-fetch logic will naturally pick up that it's now rated
     };
 
     return (
@@ -296,7 +344,7 @@ export default function RideSearch() {
             </div>
 
             {/* Active Rides Overlay - Top Right */}
-            <div className="absolute top-4 right-4 z-20 flex flex-col items-end pointer-events-none">
+            <div className="absolute top-4 right-4 z-20 flex flex-col items-end pointer-events-none space-y-4">
                 <div className="pointer-events-auto">
                     <AnimatePresence>
                         {activeUserRides.map(ride => (
@@ -306,6 +354,50 @@ export default function RideSearch() {
                                 onClick={() => navigate(`/book/${ride.uuid}`)}
                             />
                         ))}
+                    </AnimatePresence>
+                </div>
+
+                {/* Unrated Ride Prompt */}
+                <div className="pointer-events-auto">
+                    <AnimatePresence>
+                        {showUnratedPrompt && unratedRide && (
+                            <motion.div
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 50 }}
+                                className="bg-white rounded-2xl shadow-xl border border-yellow-100 p-4 w-80 relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 p-2">
+                                    <button 
+                                        onClick={handleDismissPrompt}
+                                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center shrink-0">
+                                        <Star className="w-5 h-5 text-yellow-600 fill-yellow-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-900 text-sm">Rate your last ride</h4>
+                                        <p className="text-xs text-gray-500 mt-0.5">
+                                            How was your ride with {unratedRide.driver.user?.full_name}?
+                                        </p>
+                                        
+                                        <div className="mt-3 flex gap-2">
+                                            <Button 
+                                                size="sm" 
+                                                className="w-full bg-gray-900 hover:bg-black text-white text-xs h-8 rounded-xl"
+                                                onClick={() => setRatingRide(unratedRide)}
+                                            >
+                                                Rate Driver
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
                     </AnimatePresence>
                 </div>
             </div>
@@ -426,6 +518,13 @@ export default function RideSearch() {
                 type="error" 
                 isVisible={!!error || (searching && rides.length === 0 && !loading)} 
                 onClose={() => setError(null)}
+            />
+
+            <RateRideModal 
+                ride={ratingRide}
+                open={!!ratingRide}
+                onClose={() => setRatingRide(null)}
+                onRate={handleRateSuccess}
             />
         </div>
     );
